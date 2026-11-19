@@ -20,14 +20,14 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError
 from qda_quant.checks import HEALTH_FIELDS, card_fault
 from qda_quant.doctor import Check, Context, Info
 from qda_quant.exit import USAGE
 
-from .isolation.api import job_sandbox
+from .isolation.api import Level, job_sandbox
 from .isolation.bwrap import (
     BWRAP_FIX,
     BwrapTooOld,
@@ -50,6 +50,7 @@ from .sched.config import SchedConfig
 
 if TYPE_CHECKING:
     from .config import RunConfig
+    from .sandbox_settings import Bwrap
 
 #: The sandboxes whose turns run inside Humanize's fence as a *network* fence, which needs `pidfd_getfd` for
 #: the listener it keeps on loopback. The bwrap wall cuts the network with a namespace of its own instead and
@@ -128,7 +129,7 @@ def _views(cfg: SchedConfig, workdir: Path | None, root: Path) -> dict[Path, Pat
     }
 
 
-def check_bwrap(cfg: SchedConfig, workdir: Path | None = None, *, level: str = "strict") -> Check:
+def check_bwrap(cfg: SchedConfig, workdir: Path | None = None, *, level: Level = "strict") -> Check:
     """Check that bwrap runs `true`, and opens job-readable weights, in the job's sandbox.
 
     `bwrap true` only proves the sandbox starts. When `scheduler.readable` or a `scheduler.binds` source
@@ -378,7 +379,8 @@ def check_pid_rule(cfg: RunConfig) -> Check | None:
         return None
     if (why := isolation.pid_refusal(cfg)) is not None:
         return Check("pid rule", False, why, isolation.PID_FIX)
-    pid = isolation.pid_form(cfg.sandbox.pid)  # the resolver the rule itself asks (`shared_pid_refusal`)
+    bwrap = cast("Bwrap", cfg.sandbox)  # `name == "bwrap"` above: only `Bwrap` carries that name
+    pid = isolation.pid_form(bwrap.pid)  # the resolver the rule itself asks (`shared_pid_refusal`)
     accepted = cfg.isolation.shared_node
     if pid == "shared" and accepted is not None:
         return Check(

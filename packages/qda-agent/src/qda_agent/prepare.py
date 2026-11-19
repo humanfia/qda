@@ -1856,7 +1856,8 @@ def head_rule(model_dir: Path) -> str:
     ignored = [str(x) for x in q.get("ignore") or ()]
     if any(x == "lm_head" or x.endswith(".lm_head") for x in ignored):
         return HEAD_16BIT
-    text = cfg.get("text_config") if isinstance(cfg.get("text_config"), dict) else cfg
+    text = cfg.get("text_config")
+    text = text if isinstance(text, dict) else cfg
     if text.get("tie_word_embeddings", cfg.get("tie_word_embeddings", False)):
         return HEAD_16BIT  # a tied head has no tensor of its own
     for group in (q.get("config_groups") or {}).values():

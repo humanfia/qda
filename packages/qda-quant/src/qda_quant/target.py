@@ -1348,7 +1348,7 @@ def _moe_binds(target: Target, fmt: Format, shape: tuple[int, int], args: dict) 
 
     kernel = target.plan(fmt, "moe").kernel
     if fmt.weight_type == "int" and fmt.act == "bf16":
-        kernel = _MOE_BACKENDS.get(args.get("moe_backend"), kernel)
+        kernel = _MOE_BACKENDS.get(args.get("moe_backend") or "", kernel)
     if why := shape_limit(kernel, fmt, shape):
         raise Refused(f"{kernel} cannot serve {fmt.name}: {why}")
     return kernel

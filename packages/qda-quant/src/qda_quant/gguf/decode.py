@@ -402,17 +402,19 @@ def decode(gguf: str | Path, out: str | Path, snapshot: str | Path, dtype: str =
     started = time.monotonic()
     torch_dtype = {"bf16": torch.bfloat16, "fp32": torch.float32}[dtype]
     width = 4 if dtype == "fp32" else 2
+    decode_one: Callable[..., tuple[torch.Tensor, int]]
     if t.arch in _MAPPED:
         by_hf = _mapped(t, snap, config)
-        decode_one: Callable[[str, str, file.TensorInfo], tuple[torch.Tensor, int]] = _Mapped(t, torch_dtype)
+        decode_one = _Mapped(t, torch_dtype)
         known = _snapshot_shapes(snap)
         sizes = {hf: width * int(np.prod(known[hf])) for hf in by_hf}
     else:
         g, by_hf = Gdn(t), _qwen35(t, snap)
 
-        def decode_one(_name: str, suffix: str, info: file.TensorInfo) -> tuple[torch.Tensor, int]:
+        def decode_gdn(_name: str, suffix: str, info: file.TensorInfo) -> tuple[torch.Tensor, int]:
             return _decode(info, suffix, g, torch_dtype)
 
+        decode_one = decode_gdn
         sizes = {
             hf: width * sum(int(np.prod(info.shape)) for _, _, info in entries)
             for hf, entries in by_hf.items()

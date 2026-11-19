@@ -617,6 +617,7 @@ def _graph(
     frozenset[str],
     frozenset[str],
     dict[str, str],
+    frozenset[str],
     dict[str, list[str]],
 ]:
     from ..arch import describe

@@ -107,7 +107,7 @@ def load_model(
                 route_gdn(model)  # a CUDA forward keeps fla's GDN kernels; CPU and meta take the reference
                 if source is not None:  # a probe refusal names what the user asked for, not the cache path
                     try:
-                        model._qda_source = str(source)
+                        model._qda_source = str(source)  # pyright: ignore[reportArgumentType]  # a plain attribute
                     except Exception:  # noqa: BLE001 - a model that does not take attributes still loads
                         pass
                 return model

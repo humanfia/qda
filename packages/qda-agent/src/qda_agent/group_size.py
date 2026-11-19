@@ -178,7 +178,7 @@ def _torch_target(cards: Sequence[int]) -> Target:
         return Target()
     os.environ.setdefault("CUDA_DEVICE_ORDER", "PCI_BUS_ID")  # prepare's cards are physical numbers
     try:
-        caps = [(f"cuda:{c}", tuple(torch.cuda.get_device_capability(c))) for c in cards]
+        caps = [(f"cuda:{c}", torch.cuda.get_device_capability(c)) for c in cards]
     except (RuntimeError, AssertionError):
         return Target()
     return Target.on_cards(None, caps)

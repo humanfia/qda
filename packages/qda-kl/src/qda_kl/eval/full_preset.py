@@ -423,7 +423,7 @@ def applied(
     row, origin = row_of(reference, checkpoints)
     note = (
         f"full: settings of {_key(origin)} (the released cards')"
-        if row is not None
+        if row is not None and origin is not None  # a row is always found by a name
         else f"full: no released card for {origin or reference}; 32768-token caps and its "
         "generation_config.json's sampling"
     )

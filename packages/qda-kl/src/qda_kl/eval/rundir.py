@@ -403,7 +403,7 @@ def run(run_dir: Path, suite: str | None = None, dry_run: bool = False, lcb_sand
         not final.get("choice") and len(resolved["baselines"]) == 1
     )
     checkpoints = {"candidate0": str(first)} | ({} if kept else {"winner": str(picked)})
-    if suite_name == "full":
+    if suite_name == "full" and groups is not None:  # a named suite always has its groups
         # `full` is the released cards' table (qda_kl.eval.full_preset): the run names the original, so the
         # row is expanded here and its line printed before anything else. `qda eval` expands the same table.
         from qda_quant.step import Refused

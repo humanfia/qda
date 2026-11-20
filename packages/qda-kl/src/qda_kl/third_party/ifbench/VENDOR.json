@@ -1,0 +1,56 @@
+{
+ "repo": "https://github.com/allenai/IFBench",
+ "commit": "1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d",
+ "commit_date": "2026-09-09T12:10:13+02:00",
+ "license": "Apache-2.0 (LICENSE, copied verbatim)",
+ "rewrite": [
+  "^from ifbench import  ->  from . import ",
+  "^from ifbench\\.instructions import  ->  from .instructions import "
+ ],
+ "note": "The only edit is the import rewrite above, so the package imports from inside qda_kl.third_party. Then this vendored copy is byte-identical to the upstream files whose upstream_sha256 is recorded. The IFBench test set is not vendored: the `ifbench` lm-eval task downloads allenai/IFBench_test at a pinned revision (the suite's task YAML), and the upstream `data_path` helper in __init__.py points at a directory this package does not ship.",
+ "files": {
+  "__init__.py": {
+   "upstream_path": "ifbench/__init__.py",
+   "upstream_sha256": "sha256:2a806107f115facaa3e7e6046ca97247237b4b113b514bcdd763b2530141f694",
+   "vendored_sha256": "sha256:b66e1ede0a973e090ef2476e599bef6329d6c56923277897ed57d208adc79d59"
+  },
+  "instructions.py": {
+   "upstream_path": "ifbench/instructions.py",
+   "upstream_sha256": "sha256:a76a3b300b531b95200e53427c6b1fbb72b671cf6d358796797c0fa4b6c7c44f",
+   "vendored_sha256": "sha256:f5b9e865bf98a6baed03db30ab3bec5018df78774e69d6f6151698fa88ae2c4c"
+  },
+  "classic_instructions.py": {
+   "upstream_path": "ifbench/classic_instructions.py",
+   "upstream_sha256": "sha256:d26e642f2e71e4f57218e5e05f098a22e36311485779baac401161d3228c9973",
+   "vendored_sha256": "sha256:c8e76ab330ec7b7837375878cc0d182cbbc83a158f2833feee5fcc2696566812"
+  },
+  "instructions_registry.py": {
+   "upstream_path": "ifbench/instructions_registry.py",
+   "upstream_sha256": "sha256:5119f2919261c77566f698f2f367883aff56cf89443bac5a56b6e30ddbd5aef9",
+   "vendored_sha256": "sha256:bdde2c3517a1d044f71436c454c2588204df1d0b1ab7b48ac8d507bb1abdea94"
+  },
+  "instructions_util.py": {
+   "upstream_path": "ifbench/instructions_util.py",
+   "upstream_sha256": "sha256:6996a6efaf6e3c92a2e926881eadc8c0262fb8d06c8cb56394ef7322f69e1930",
+   "vendored_sha256": "sha256:6996a6efaf6e3c92a2e926881eadc8c0262fb8d06c8cb56394ef7322f69e1930"
+  },
+  "evaluation_lib.py": {
+   "upstream_path": "evaluation_lib.py",
+   "upstream_sha256": "sha256:e681a4b03a6a9dfb540fbd9ef6b963de503a5ffac557ed611c326ee385850cf6",
+   "vendored_sha256": "sha256:8fcb505739a55a0613e477a8ba77256b9c424bc4cf0ca5af2f3bb1eec6661d2b"
+  },
+  "LICENSE": {
+   "upstream_path": "LICENSE",
+   "upstream_sha256": "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+   "vendored_sha256": "sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  }
+ },
+ "dropped": {
+  "instructions_test.py": {
+   "upstream_path": "instructions_test.py",
+   "upstream_sha256": "sha256:e312bb4021cf1760ad2d8a468407e514b85903991b4a21d155b3f145b03bba8d",
+   "vendored_sha256": "sha256:8ff1be3651d35a1812d8bda2fee2f08a0fb0f2556f7f4b30ed07d6c6b5cb1358",
+   "reason": "Upstream test, not imported by the runtime checker; removed from the shipped package."
+  }
+ }
+}

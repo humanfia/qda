@@ -1,0 +1,18 @@
+{
+ "source_repo": "Qwen/Qwen3.5-4B@851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+ "format": "w4a16-asym-g64",
+ "target": "sm90@0.33.0",
+ "serve": {
+  "vllm": "0.33.0",
+  "env": {},
+  "args": {
+   "linear_backend": "marlin"
+  },
+  "plugins": [],
+  "kernels": {
+   "dense": [
+    "MarlinLinearKernel"
+   ]
+  }
+ }
+}

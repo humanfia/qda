@@ -1,0 +1,21 @@
+# The GPTQ comparison config: Qwen3-0.6B, GPTQ W4A16 (symmetric, group 128) on C4, the recipe docs/reproduce.md
+# (Repeat it) builds with both libraries (bench/llmc_quickstart.py reads its calibration). Not the quickstart default.
+# Needs the `hf` extra (a plain `uv sync` installs it).   qda build configs/compare-gptq.yaml
+# Data: allenai/c4, subset en, validation split, streamed. License: ODC-BY, and the Common Crawl terms of use
+# apply to its content (the dataset card's "Licensing Information"). The revision pins the exact rows.
+# Other data (for example chat `messages` rows through `file` or `mix`) is one config change away.
+model: Qwen/Qwen3-0.6B@c1899de289a04d12100db370d81485cdf75e47ca  # Apache-2.0; the revision pins the weights
+format: w4a16-sym-g128
+out: qwen3-0.6b-gptq-c4
+steps:
+  - gptq: {}
+calib:
+  hf:
+    dataset: allenai/c4
+    revision: 1588ec454efa1a09f29cd18ddd04fe05fc8653a2
+    subset: en
+    split: validation
+    column: text
+    rows: 2000
+    samples: 128
+    seqlen: 2048

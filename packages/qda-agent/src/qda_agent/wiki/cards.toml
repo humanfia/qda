@@ -1,0 +1,41 @@
+# Card -> qda_quant steps that implement it (recipe names of the `qda.steps` registry).
+# references/capability.md is generated from this table and the installed step registry
+# (qda_agent.wiki.capability); a test fails when a registered step is in no row and not under [no_card].
+# [] = no step of this library implements the card; [note] replaces "no implementation in this library".
+
+[cards]
+cond-awq = ["awq"]
+cond-awq-moe = ["awq"]
+cond-head-embed-served-form = ["head"]
+cond-module-mixing = []
+cond-moe-expert-hessian = ["gptq"]
+grid-clip-search = ["rtn", "gptq"]
+grid-gptq = ["gptq"]
+grid-group-cd = []
+grid-hqq-proximal = []
+grid-rtn = ["rtn"]
+grid-scheme = []
+grid-served-scale = []
+lptq-block-ap = []
+lptq-e2e-scale-tune = ["scale_kd"]
+lptq-gsq = ["gsq"]
+lptq-omniquant = []
+lptq-qat-kd = []
+lptq-signround = ["autoround"]
+meas-small-difference = []
+obj-distillation-loss = ["scale_kd"]
+obj-fp-target-refit = ["gptaq"]
+obj-gradient-token-weights = ["guided", "fisher_trace"]
+rot-channel-perm = ["permute"]
+rot-hadamard-r1 = ["rotate"]
+rot-hadamard-r2 = ["rotate"]
+rot-spinquant = []
+
+[note]
+cond-moe-expert-hessian = "yes: `gptq` with `router_weighted: true` (fused expert banks)"
+meas-small-difference = "not a method: how to compare two builds whose difference is small"
+grid-scheme = "not a method: the choice of format (bits, group size, zero point) the methods build toward"
+
+# Steps that implement no card, with what they are (they get a row of their own on the page).
+[no_card]
+soup = "averages the scales of several packed checkpoints of one model and format"

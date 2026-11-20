@@ -1,0 +1,9 @@
+# rot-hadamard-r2
+Addresses: outlier value channels inside one head give o_proj's input group (one head is typically one g128 group) and v_proj's output rows a wide range. Measured as: per head, absmax/rms of v_proj's output rows and of o_proj's input columns.
+Mechanism: Inside attention, apply a head_dim Hadamard per head to v_proj's output rows and the inverse to the matching o_proj input columns (block-diagonal over heads, shared by all query heads of a GQA group). Attention mixes value vectors only across positions, so the rotation passes through it and is fully absorbed offline; no norm fusion is needed.
+Effect: within each head, absmax/rms of those rows and columns falls toward the Gaussian value of the same width; the function is unchanged.
+Preconditions: head_dim = 2^n; nothing channel-wise between v_proj's output and o_proj's input: no output gate (e.g. sigmoid(gate) ⊙ attn, which does not commute with a rotation), no v-norm, no key = value sharing that removes v_proj; layer types without a v_proj (linear attention, k-eq-v layers) are out of scope.
+Inference overhead: none (fully absorbed).
+Pitfalls: an elementwise output gate, a value norm, or a shared key/value tensor between v_proj and o_proj breaks the fold without an error. Run the fp32 identity check per layer, and refuse the layer, not the model. Second: the per-head rotation is an identity only if the head boundaries in v_proj's output rows and in o_proj's input columns are the same; with GQA, several query heads share one value head, so the block structure differs on the two sides.
+Origin: Ashkboos et al. (QuaRot) fold a head-wise rotation into the value and output projections, where it cancels across attention's mixing of positions.
+Source: Ashkboos et al., "QuaRot: Outlier-Free 4-Bit Inference in Rotated LLMs", NeurIPS 2024. https://arxiv.org/abs/2404.00456 · code: https://github.com/spcl/QuaRot

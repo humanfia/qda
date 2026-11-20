@@ -1,0 +1,8 @@
+# MMLU-Pro, chemistry: the harness's own per-subject task with the dataset revision pinned by
+# `_mmlu_pro_template.yaml`. The instruction names the subject and the five few-shot examples are that
+# subject's validation rows (the harness's `process_docs`), so the prompt is the standard group's.
+description: "The following are multiple choice questions (with answers) about chemistry. Think step by step and then finish your answer with \"the answer is (X)\" where X is the correct letter choice.\n"
+include: "_mmlu_pro_template.yaml"
+task: "mmlu_pro_chemistry"
+task_alias: "chemistry"
+process_docs: !function lm_eval.tasks.mmlu_pro.utils.process_chemistry

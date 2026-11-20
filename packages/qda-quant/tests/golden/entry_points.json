@@ -1,0 +1,148 @@
+{
+  "qda.steps": [
+    "autoround",
+    "awq",
+    "fisher_trace",
+    "gptaq",
+    "gptq",
+    "gsq",
+    "guided",
+    "head",
+    "permute",
+    "rotate",
+    "rtn",
+    "scale_kd",
+    "soup"
+  ],
+  "qda.commands": [
+    "decode-gguf",
+    "rotate-draft"
+  ],
+  "qda.stats": [
+    "cross_hessian",
+    "layer_io_float"
+  ],
+  "qda.arch_adapters": [
+    "deepseek_v2",
+    "deepseek_v4",
+    "deepseek_v41",
+    "fused_experts",
+    "gemma3_vl",
+    "gemma4_experts",
+    "gemma4_vl",
+    "glm5_next",
+    "gpt_oss",
+    "mistral3",
+    "minimax_m2",
+    "mixtral",
+    "qwen2_5_vl",
+    "qwen2_moe",
+    "qwen3_5",
+    "qwen3_next",
+    "qwen3_vl"
+  ],
+  "qda.prefill_numerics": [
+    "deepseek_v41_sm90",
+    "deepseek_v41_reference"
+  ],
+  "qda.targets": [
+    "llama_cpp",
+    "sm80",
+    "sm89",
+    "sm90",
+    "sm100",
+    "sm103",
+    "sm120"
+  ],
+  "qda.formats": [
+    "w3a16",
+    "w4a16",
+    "w4a8",
+    "w8a8i",
+    "w8a8-fp8",
+    "w4a4-nvfp4",
+    "w4a16-iq4xs",
+    "w4a16-iq4nl",
+    "w3a16-q3k"
+  ],
+  "qda.bindings": [
+    "llama_cpp",
+    "llama_cpp_moe",
+    "sm80",
+    "sm80_moe",
+    "sm89",
+    "sm89_moe",
+    "sm90",
+    "sm90_moe",
+    "sm100",
+    "sm100_moe",
+    "sm103",
+    "sm103_moe",
+    "sm120",
+    "sm120_moe"
+  ],
+  "qda.grids": [
+    "absmax",
+    "signed8",
+    "q4k",
+    "q5k",
+    "q6k",
+    "iq4nl",
+    "iq4xs",
+    "q3k",
+    "nvfp4"
+  ],
+  "qda.clips": [
+    "fp4hmse",
+    "fp4mse",
+    "grid3",
+    "hmse",
+    "imatrix",
+    "imse",
+    "minmax",
+    "mse"
+  ],
+  "qda.weight_stores": [
+    "resident",
+    "stream",
+    "disk"
+  ],
+  "qda.corpora": [
+    "file",
+    "reasoning"
+  ],
+  "qda.source_codecs": [
+    "float",
+    "fp8_block",
+    "fp4_block",
+    "mxfp4",
+    "nvfp4"
+  ],
+  "qda.checkpoint_formats": [
+    "compressed_tensors",
+    "fp8",
+    "gguf",
+    "gptq_awq",
+    "modelopt",
+    "mxfp4",
+    "unknown",
+    "unquantized"
+  ],
+  "qda.exporters": [
+    "awq_bf16",
+    "compressed_tensors",
+    "gguf"
+  ],
+  "qda.checks": [
+    "environment"
+  ],
+  "qda.calib": [
+    "corpus",
+    "file",
+    "mix",
+    "selfgen",
+    "slice",
+    "hf",
+    "vlm"
+  ]
+}

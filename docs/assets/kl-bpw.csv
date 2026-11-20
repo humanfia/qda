@@ -1,0 +1,8 @@
+name,source,format,bpw_linear,size_gb,kl,kl_ci_low,kl_ci_high,n_prompts,prompts_sha256,vllm_version,gpu
+DeepSeek-R1-Distill-Llama-8B,original,BF16,16.0,16.0606,,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)
+QDA-DeepSeek-R1-Distill-Llama-8B-W4A16,QDA,compressed-tensors pack-quantized w4a16-asym-g128,4.156254,5.728,0.013242142341862592,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)
+QDA-DeepSeek-R1-Distill-Llama-8B-W4A8,QDA,compressed-tensors pack-quantized w4a8-sym-g128 (fp8 act),4.125004,5.7007,0.019853662349301106,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)
+QDA-DeepSeek-R1-Distill-Llama-8B-W3A16,QDA,compressed-tensors pack-quantized w3a16-sym-g128,3.125004,4.0567,0.048621364212807376,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)
+RedHatAI/DeepSeek-R1-Distill-Llama-8B-quantized.w4a16,RedHatAI,compressed-tensors pack-quantized w4a16-sym-g128,4.125004,5.7007,0.026771890322366557,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)
+RedHatAI/DeepSeek-R1-Distill-Llama-8B-quantized.w8a8,RedHatAI,compressed-tensors int-quantized w8a8-int8,8.003155,9.084,0.0053793523058061855,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)
+RedHatAI/DeepSeek-R1-Distill-Llama-8B-FP8-dynamic,RedHatAI,compressed-tensors float-quantized fp8-dynamic,8.003155,9.084,0.00447646654024002,,,201,351ce6d16d196a97f280edc4ee902c111c3c007855aa0ba0183103970b0d9ce7,0.33.0,H100 80GB HBM3 (sm90)

@@ -1,0 +1,25 @@
+override names the source key || calib.samples: unknown key; a source's settings go under its key (calib.file.samples)
+unknown source setting || calib.file.sample: unknown key
+strict source settings || sample: Extra inputs are not permitted
+old calib shape || calib.path: unknown calib source; known: ['corpus', 'file', 'hf', 'mix', 'selfgen', 'slice', 'vlm']
+two sources || calib: expected one source {key: settings}, known: ['corpus', 'file', 'hf', 'mix', 'selfgen', 'slice', 'vlm']; got {'file': {'path': 'a'}, 'mix': {}}
+unknown source || calib.nope: unknown calib source; known: ['corpus', 'file', 'hf', 'mix', 'selfgen', 'slice', 'vlm']
+missing calib file || calib file <tmp>/default-calib.jsonl: cannot read: [Errno 2] No such file or directory: '<tmp>/default-calib.jsonl'
+trace without fingerprint || calibration <tmp>/r.jsonl: token ids made by tokenizer (no fingerprint), the model's is c6fbccf1fcf71a1b79a058d53b446d257c7edd8914a7f2d5faa9e183f07b7ca5; use text or messages rows, or ids with the matching fingerprint
+ids mixed with traces || calibration <tmp>/r.jsonl: mixes input_ids rows with trace rows {prompt_ids, completion_ids}
+ids mixed with text || calibration <tmp>/r.jsonl: mixes token-id rows with text rows
+mix part missing || calib mix part <tmp>/missing.jsonl: cannot read: [Errno 2] No such file or directory: '<tmp>/missing.jsonl'
+mix heldout missing || calib mix heldout <tmp>/missing.jsonl: cannot read: [Errno 2] No such file or directory: '<tmp>/missing.jsonl'
+slice unknown name || calib slice nope: no nope.jsonl in pool <tmp>/pool; known: ['a']
+slice weight not positive || : Value error, calib.slice.names.a: weight 0.0 is not positive
+slice name with a path || : Value error, calib.slice.names: '../a' is not a slice name (a file name in the pool)
+hf without revision || revision: Field required
+hf without pyarrow || calib hf: needs the `pyarrow` package to read a parquet dataset: uv pip install -c constraints.txt "./packages/qda-quant[hf]"
+hf split without a file || calib hf org/chat@0123456789abcdef0123456789abcdef01234567: no data file of split 'val' among ['train.jsonl']
+hf column missing || calib hf org/chat@0123456789abcdef0123456789abcdef01234567: train.jsonl has no column 'messages'; it has ['other']
+hf unknown column shape || calib hf org/chat: column 'messages' holds int; expected chat messages [{role, content}, ...], ShareGPT turns [{from, value}, ...] or a text string
+hf unknown sharegpt speaker || calib hf org/chat: ShareGPT turn from 'bot'; known speakers: human, user, gpt, assistant, system
+hf offline || calib hf org/chat@0123456789abcdef0123456789abcdef01234567: cannot read the dataset: ConnectionError: Couldn't reach 'org/chat' on the Hub (OfflineModeIsEnabled)
+hf revision unreachable || calib hf org/chat@main: cannot resolve the revision: ConnectError: Couldn't reach 'org/chat' on the Hub
+hf revision without sha || calib hf org/chat@main: the hub gave no commit hash: None
+hf revision that is a branch || calib hf org/chat@main: the hub gave no commit hash: 'main'

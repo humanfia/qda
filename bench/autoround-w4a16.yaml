@@ -1,0 +1,8 @@
+# AutoRound at auto-round's settings, as llm-compressor 0.15 runs it: Qwen3-8B, W4A16 symmetric, group 128.
+# qda build bench/autoround-w4a16.yaml --set calib.file.path=CALIB.jsonl --set out=DIR
+model: Qwen/Qwen3-8B@b968826d9c46dd6066d109eabc6255188de91218
+format: w4a16-sym-g128
+batch_size: 8
+steps:
+  - autoround: {iters: 200, lr: 0.005, batches: 1}
+calib: {file: {path: calib.jsonl, samples: 128, seqlen: 2048}}

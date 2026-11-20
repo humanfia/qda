@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "QDA"
+version: 0.1.0
+license: Apache-2.0
+repository-code: "https://github.com/humanfia/qda"
+authors:
+  - family-names: Li
+    given-names: Xingyang
+  - family-names: Zhao
+    given-names: Tianlang
+  - family-names: Han
+    given-names: Song
+  - family-names: Zhu
+    given-names: Ligeng
+preferred-citation:
+  type: article
+  title: "QDA: Closed-Loop LLM Quantization Design with Agents"
+  authors:
+    - family-names: Li
+      given-names: Xingyang
+    - family-names: Zhao
+      given-names: Tianlang
+    - family-names: Han
+      given-names: Song
+    - family-names: Zhu
+      given-names: Ligeng
+  year: 2026
+  journal: "arXiv preprint arXiv:2611.23388"
+  url: "https://arxiv.org/abs/2611.23388"
+  doi: "10.48550/arXiv.2611.23388"

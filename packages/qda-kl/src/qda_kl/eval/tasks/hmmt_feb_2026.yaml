@@ -1,0 +1,28 @@
+# HMMT February 2026, the second half of the paper's math suite (the first is aime25).
+# lm-evaluation-harness ships no HMMT task; the answer check is its AIME one.
+task: hmmt_feb_2026
+dataset_path: MathArena/hmmt_feb_2026
+dataset_kwargs:
+  revision: 589a53fe152febc0f4f99f3e561007bf8da8e664
+output_type: generate_until
+training_split: train
+test_split: train
+doc_to_text: "Question: {{problem}}\nAnswer:"
+doc_to_target: "{{answer}}"
+process_results: !function lm_eval.tasks.aime.utils.process_results
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "Question:"
+    - "</s>"
+    - "<|im_end|>"
+    - "<|eot_id|>"
+  do_sample: false
+  temperature: 0.0
+  max_gen_toks: 32768
+num_fewshot: 0
+metadata:
+  version: 1.0

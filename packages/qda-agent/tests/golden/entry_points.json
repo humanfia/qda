@@ -1,0 +1,55 @@
+{
+  "qda_agent.backends": [
+    "claude",
+    "codex",
+    "dsh"
+  ],
+  "qda_agent.schedulers": [
+    "qsched"
+  ],
+  "qda_agent.launchers": [
+    "local"
+  ],
+  "qda_agent.toolsets": [
+    "public",
+    "qda"
+  ],
+  "qda_agent.components": [
+    "baselines",
+    "bpw",
+    "data",
+    "gencheck",
+    "handin",
+    "kl",
+    "qda",
+    "qsched",
+    "serve",
+    "source",
+    "views",
+    "wiki"
+  ],
+  "qda_agent.contamination_checks": [
+    "none",
+    "ngram"
+  ],
+  "qda.final_rules": [
+    "baseline",
+    "best_metric",
+    "handin",
+    "last_valid"
+  ],
+  "qda_agent.sandboxes": [
+    "bwrap",
+    "none"
+  ],
+  "qda.eval_suites": [
+    "livecodebench"
+  ],
+  "qda.checks": [
+    "disk room",
+    "search"
+  ],
+  "qda.commands": [
+    "probe"
+  ]
+}

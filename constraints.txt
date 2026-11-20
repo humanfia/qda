@@ -1,0 +1,6 @@
+# The versions of the dependency stack the frozen lock (uv.lock) tests. A fresh pip install must resolve these:
+# without them the builder picks a newer torch and transformers, and the scorer's vLLM pin then replaces them
+# with a second multi-GB download. Keep in step with `uv lock`; the README passes this file with `-c`.
+torch==2.14.0
+transformers==5.20.2
+vllm==0.33.0

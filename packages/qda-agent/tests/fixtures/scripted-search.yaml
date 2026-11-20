@@ -1,0 +1,26 @@
+# CPU fixture: a test-only backend uses the normal search flow and stand-in commands.
+model: Qwen/Qwen3-8B
+format: w4a16
+budget_gpu_hours: 0.004
+cards: [0, 1]
+run_dir: ../../runs/scripted-search
+baselines: [baselines/gptq]
+scheduler: {name: qsched, tick_s: 0.05, kill_grace_s: 1, gpus: false}
+toolset:
+  name: qda
+  qda: [python3, -c, "import sys; print('stand-in qda:', *sys.argv[1:])"]
+judge:
+  eval_max_tokens: 32768
+  allow_any_format: true
+  evaluator: ../../examples/standin_kl
+  kl_ref: ref
+  kl_holdout_ref: holdout
+  check_cmd: null
+  kl_cmd: [python3, "{eval}/kl.py", "{ckpt}", "{out}"]
+  kl_score_s: 1
+  build_expected_s: 2
+drain_timeout_s: 20
+agent: {backend: test_scripted, resend_wait_s: 0.5}
+sandbox: none
+isolation: {level: none}  # the CPU stand-in runs unconfined; the level is stated, not defaulted
+contamination: none  # CPU stand-ins: no guard file; the default ngram check needs one

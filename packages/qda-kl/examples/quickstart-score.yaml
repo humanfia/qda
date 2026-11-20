@@ -1,0 +1,6 @@
+# Score a Qwen3-0.6B checkpoint (docs/reproduce.md) against a reference of the original model (qda-kl score CONFIG.yaml).
+# Build the reference once first:
+#   qda-kl ref --model Qwen/Qwen3-0.6B --prompts packages/qda-kl/examples/prompts-small.jsonl --out qwen3-0.6b-ref
+checkpoint: qwen3-0.6b-w4a16
+reference: qwen3-0.6b-ref
+out: qwen3-0.6b-score

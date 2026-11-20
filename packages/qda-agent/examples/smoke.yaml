@@ -1,0 +1,26 @@
+# Real-agent smoke on CPU: `qda-agent run examples/smoke.yaml` (claude haiku in the bwrap wall, stand-in KL,
+# no GPU; <= $1). It runs a real agent against stand-in commands.
+model: Qwen/Qwen3-8B
+format: w4a16
+budget_gpu_hours: 0.0667   # 2 cards -> 2 min to the deadline
+cards: [0, 1]                     # queue slots only (scheduler.gpus: false): no GPU is used
+run_dir: ../runs/smoke
+baselines: [baselines/gptq]
+contamination: none              # stand-in checkpoints, no guard file; a real search keeps the default ngram
+scheduler: {name: qsched, tick_s: 0.05, kill_grace_s: 1, gpus: false}
+toolset:
+  name: qda
+  qda: [python3, -c, "import sys; print('stand-in qda (no qda-quant in this smoke run):', *sys.argv[1:])"]
+judge:
+  allow_any_format: true          # stand-in checkpoints only; never in a real search
+  evaluator: standin_kl           # copied read-only into the run; {eval} in commands
+  check_cmd: null                 # no serving check (needs vLLM)
+  kl_cmd: [python3, "{eval}/kl.py", "{ckpt}", "{out}"]
+  kl_score_s: 1
+  build_expected_s: 2
+drain_timeout_s: 20
+agent:
+  backend: {name: claude, model: claude-haiku-5-5, effort: low}
+  cost_usd: 1
+  retries: 1
+sandbox: {name: bwrap}     # fresh /dev (no GPU nodes) around the Humanize fence

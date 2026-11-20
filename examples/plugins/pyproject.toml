@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qda-example-plugins"
+version = "0.1.0"
+description = "Examples of external QDA plugins"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = ["qda-agent", "qda-kl", "qda-quant"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qda_example_plugins"]
+
+[project.entry-points."qda.plugins"]
+example = "qda_example_plugins:register"

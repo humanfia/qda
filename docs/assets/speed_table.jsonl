@@ -1,0 +1,18 @@
+{"model": "Qwen3-8B", "method": "gptq", "cards": 1, "qda": {"s": 58.7, "peak_gib": 23.2, "tree": "9cf441e0"}, "llmc": {"s": 156.8, "peak_gib": 20.7}}
+{"model": "Qwen3-8B", "method": "gptq", "cards": 2, "qda": {"s": 53.4, "peak_gib": 25.0, "tree": "9cf441e0"}, "llmc": {"s": 157.7, "peak_gib": 14.3}}
+{"model": "Qwen3-8B", "method": "gptq", "cards": 4, "qda": {"s": 48.7, "peak_gib": 25.6, "tree": "9cf441e0"}, "llmc": {"s": 158.2, "peak_gib": 10.9}}
+{"model": "Qwen3-8B", "method": "awq-rtn", "cards": 1, "qda": {"s": 216.025, "peak_gib": 44.5, "tree": "a8fa537c"}, "llmc": {"s": 267.0, "peak_gib": 31.6}}
+{"model": "Qwen3-8B", "method": "awq-rtn", "cards": 2, "qda": {"s": 132.993, "peak_gib": 34.1, "tree": "a8fa537c"}, "llmc": {"s": 265.8, "peak_gib": 25.5}}
+{"model": "Qwen3-8B", "method": "awq-rtn", "cards": 4, "qda": {"s": 91.212, "peak_gib": 27.9, "tree": "a8fa537c"}, "llmc": {"s": 271.7, "peak_gib": 21.9}}
+{"model": "Qwen3.8-27B", "method": "gptq", "cards": 1, "qda": {"s": 190.8, "peak_gib": 63.5, "tree": "37a8f7c9"}, "llmc": {"s": 501.256, "peak_gib": 61.5}}
+{"model": "Qwen3.8-27B", "method": "gptq", "cards": 2, "qda": {"s": 155.4, "peak_gib": 66.9, "tree": "37a8f7c9"}, "llmc": {"s": 500.657, "peak_gib": 39.4}}
+{"model": "Qwen3.8-27B", "method": "gptq", "cards": 4, "path": "undeclared", "qda": {"s": 119.3, "peak_gib": 64.5, "tree": "a8fa537c"}, "llmc": {"s": 511.1, "peak_gib": 24.5, "kl": 0.04285}}
+{"model": "Qwen3.8-27B", "method": "awq-rtn", "cards": 1, "qda": {"s": 653.56, "peak_gib": 49.1, "tree": "a8fa537c", "residency": "stream"}, "llmc": {"s": 903.341, "peak_gib": 76.9}}
+{"model": "Qwen3.8-27B", "method": "awq-rtn", "cards": 2, "qda": {"s": 387.734, "peak_gib": 31.4, "tree": "a8fa537c", "residency": "stream"}, "llmc": {"s": 907.282, "peak_gib": 51.8}}
+{"model": "Qwen3.8-27B", "method": "awq-rtn", "cards": 4, "qda": {"s": 241.077, "peak_gib": 67.8, "tree": "a8fa537c"}, "llmc": {"s": 915.863, "peak_gib": 39.6}}
+{"model": "Qwen3.6-35B-A3B", "method": "gptq", "cards": 1, "qda": {"s": 181.2, "peak_gib": 39.1, "tree": "ee5fa499", "residency": "stream"}, "llmc": {"status": "oom"}}
+{"model": "Qwen3.6-35B-A3B", "method": "gptq", "cards": 2, "qda": {"s": 156.0, "peak_gib": 35.3, "tree": "ee5fa499", "residency": "stream"}, "llmc": {"s": 1668.23, "peak_gib": 78.6}}
+{"model": "Qwen3.6-35B-A3B", "method": "gptq", "cards": 4, "path": "undeclared", "qda": {"s": 149.5, "peak_gib": 47.9, "tree": "0adbe407", "residency": "stream"}, "llmc": {"s": 1703.7, "peak_gib": 71.0}}
+{"model": "Qwen3.6-35B-A3B", "method": "awq-rtn", "cards": 1, "qda": {"s": 456.905, "peak_gib": 42.2, "tree": "a4057aed", "residency": "stream"}, "llmc": {"status": "oom"}}
+{"model": "Qwen3.6-35B-A3B", "method": "awq-rtn", "cards": 2, "qda": {"s": 393.822, "peak_gib": 62.6, "tree": "a4057aed", "residency": "stream"}, "llmc": {"s": 10889.36, "peak_gib": 78.2}}
+{"model": "Qwen3.6-35B-A3B", "method": "awq-rtn", "cards": 4, "qda": {"s": 376.564, "peak_gib": 57.4, "tree": "a4057aed", "residency": "stream"}, "llmc": {"s": 10870.78, "peak_gib": 47.7}}

@@ -1,0 +1,6 @@
+{"prompt_ids": [107, 100, 1, 2, 108, 107, 100], "completion_ids": [105, 106, 3, 4], "domain": "instruct"}
+{"prompt_ids": [101, 103, 1, 2, 104, 105], "completion_ids": [3, 4, 5, 102], "domain": "math", "appended_eos": true}
+{"prompt_ids": [101, 103, 1, 2, 104, 105], "completion_ids": [3, 106, 4, 102], "domain": "math", "appended_eos": true}
+{"prompt_ids": [101, 103, 1, 2, 104, 105], "completion_ids": [3, 4, 5], "domain": "code"}
+{"prompt_ids": [101, 103, 1, 104, 105], "completion_ids": [2, 106, 3, 102], "domain": "instruct"}
+{"prompt_ids": [103, 1, 104, 105], "completion_ids": [106, 2, 102], "domain": "instruct"}

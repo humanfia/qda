@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qda-kl"
+version = "0.1.0"
+description = "Score any vLLM checkpoint by its KL divergence from the original model, in minutes"
+requires-python = ">=3.11"  # vLLM 0.33 (the [vllm] extra) needs 3.11
+license = "Apache-2.0"
+dependencies = ["qda-quant", "numpy", "pydantic>=2", "pyyaml"]
+
+[project.urls]
+Repository = "https://github.com/humanfia/qda"
+Documentation = "https://github.com/humanfia/qda/tree/main/docs"
+
+[project.optional-dependencies]
+vllm = ["vllm==0.33.0"]  # the pinned serving stack (sm90 Humming sweep clean)
+# qda eval suite `lm_eval`; ifeval/math: IFEval and AIME scoring; the rest: the vendored IFBench checkers.
+eval = ["lm-eval[vllm,ifeval,math]==0.4.13", "absl-py", "emoji", "syllapy"]
+dev = ["pytest", "ruff"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qda_kl"]
+
+[tool.hatch.build]
+artifacts = [
+  "src/qda_kl/data/*.jsonl",
+  "src/qda_kl/data/README.md",
+  "src/qda_kl/eval/tasks/*.yaml",
+  "src/qda_kl/gguf/probe.cpp",
+  "src/qda_kl/third_party/ifbench/VENDOR.json",
+  "src/qda_kl/third_party/ifbench/LICENSE",
+]
+
+[project.scripts]
+qda-kl = "qda_kl.cli:main"
+
+[project.entry-points."qda.plugins"]
+qda_kl = "qda_kl.extensions:register"

@@ -1,0 +1,21 @@
+{
+  "qda_kl.scorers": [
+    "topk"
+  ],
+  "qda.eval_suites": [
+    "full",
+    "kl",
+    "lm_eval",
+    "sanity",
+    "specdec"
+  ],
+  "qda.datasets": [
+    "file",
+    "gencheck_builtin",
+    "lm_eval_builtin"
+  ],
+  "qda.commands": [
+    "eval",
+    "traces"
+  ]
+}

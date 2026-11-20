@@ -1,0 +1,78 @@
+[project]
+name = "qda-workspace"
+version = "0.0.0"
+requires-python = ">=3.12"
+description = "QDA monorepo: qda-quant (library), qda-kl (evaluator), qda-agent (search harness)"
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+qda-quant = { workspace = true }
+qda-kl = { workspace = true }
+qda-agent = { workspace = true }
+
+# What a plain `uv sync` installs: build (with Hub calibration data and the GGUF exporter's packages), score
+# and serve (vLLM), and the agent harness, in one env.
+[dependency-groups]
+user = ["qda-quant[hf,gguf]", "qda-kl[vllm]", "qda-agent"]
+docs = [
+    "sphinx==9.1.1",
+    "myst-parser==5.1.0",
+    "furo==2025.12.19",
+    "sphinx-copybutton==0.5.2",
+    "sphinx-autoapi==3.9.0",
+]
+dev = ["pyright==1.1.414"]
+
+# vLLM 0.33 pins compressed-tensors 0.17.0, llm-compressor 0.15 pins 0.20.1: they cannot share an env.
+# qda itself needs neither llm-compressor nor compressed-tensors (only a quantized model loaded
+# through transformers reads it), so the user env is qda-quant + qda-kl[vllm]; qda-quant[llmc] is for baselines only:
+#   uv sync --no-default-groups --all-packages --extra llmc
+[tool.uv]
+default-groups = ["user"]
+conflicts = [
+    [{ package = "qda-quant", extra = "llmc" }, { package = "qda-quant", extra = "vllm" }],
+    [{ package = "qda-quant", extra = "llmc" }, { package = "qda-kl", extra = "vllm" }],
+    [{ package = "qda-quant", extra = "llmc" }, { package = "qda-kl", extra = "eval" }],
+    [{ package = "qda-quant", extra = "llmc" }, { group = "user" }],
+    [{ package = "qda-quant", extra = "dev" }, { package = "qda-kl", extra = "vllm" }],
+    [{ package = "qda-quant", extra = "dev" }, { package = "qda-quant", extra = "vllm" }],
+    [{ package = "qda-quant", extra = "dev" }, { package = "qda-kl", extra = "eval" }],
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+extend-exclude = [  # third-party code, kept byte-for-byte
+    "packages/qda-agent/src/qda_agent/third_party",
+    "packages/qda-kl/src/qda_kl/third_party",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+# Resolve the packages from this tree: a venv whose editable install names another checkout would otherwise
+# be read as a second copy of each module, and a class would not match itself.
+extraPaths = ["packages/qda-quant/src", "packages/qda-kl/src", "packages/qda-agent/src"]
+pythonVersion = "3.12"
+include = ["packages/qda-quant/src", "packages/qda-kl/src", "packages/qda-agent/src"]
+exclude = ["packages/qda-agent/src/qda_agent/third_party", "packages/qda-kl/src/qda_kl/third_party"]
+ignore = [  # third-party code, kept byte-for-byte
+    "packages/qda-agent/src/qda_agent/third_party",
+    "packages/qda-kl/src/qda_kl/third_party",
+]
+reportMissingImports = "warning"  # optional heavy deps (vllm, sglang, triton) are not in every env
+reportMissingModuleSource = "none"
+
+[tool.pytest.ini_options]
+markers = ["gpu: needs a GPU", "slow: > 1 min"]
+# importlib: the packages share test basenames (test_cli.py); one root config serves all three packages.
+addopts = "-m 'not gpu and not slow' --import-mode=importlib"
+# Vendored third-party code keeps its upstream files byte-identical, tests included; those are not ours to run.
+norecursedirs = [".*", "*.egg", "_darcs", "build", "CVS", "dist", "node_modules", "venv", "{arch}", "vendor", "_vendor", "third_party"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

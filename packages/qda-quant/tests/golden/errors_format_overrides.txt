@@ -1,0 +1,5 @@
+part of a fused group || format_overrides: 'model.layers.1.self_attn.q_proj' matches 1 of the 3 linears of model.layers.1.self_attn.q_proj; they are solved and served as one fused linear with one scheme: match them all
+names no unit || format_overrides: 'model.layers.7.self_attn.o_proj' matches no unit this build quantizes; a pattern is an exact module name as `qda plan` prints it, or re: and a regex matched from its start
+names a unit ignore keeps || format_overrides: 'model.layers.1.self_attn.o_proj' matches no unit this build quantizes; model.layers.1.self_attn.o_proj is kept bf16 by `ignore` (model.layers.1.self_attn.o_proj); a pattern is an exact module name as `qda plan` prints it, or re: and a regex matched from its start
+two formats for one unit || format_overrides: model.layers.1.self_attn.o_proj is w8a16-sym-g128 under 'model.layers.1.self_attn.o_proj' and w4a8-sym-g128 under 'model.layers.1.self_attn.o_proj'; one unit is stored in one format
+format the target cannot serve || format_overrides: model.layers.1.self_attn.o_proj in w2a16-sym-g32 ('model.layers.1.self_attn.o_proj'): w2a16-sym-g32 dense on sm90 vLLM 0.33.0: no WNA16 kernel serves int2

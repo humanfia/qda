@@ -1,0 +1,10 @@
+{"id": "m1", "domain": "math", "prompt": "Find all real x such that x^4 - 5x^2 + 4 = 0. Show your reasoning briefly."}
+{"id": "m2", "domain": "math", "prompt": "A bag has 3 red and 5 blue balls. Two are drawn without replacement. What is the probability that both are the same color?"}
+{"id": "c1", "domain": "code", "prompt": "Write a Python function that returns the length of the longest strictly increasing subsequence of a list of integers in O(n log n) time. Explain it in two sentences."}
+{"id": "c2", "domain": "code", "prompt": "Given a string s, write a function that checks whether its brackets ()[]{} are balanced. Give the code in C++."}
+{"id": "s1", "domain": "science", "prompt": "Why does ice float on water? Explain in terms of hydrogen bonding and density."}
+{"id": "s2", "domain": "science", "prompt": "A 2 kg mass on a spring with k = 50 N/m is displaced 0.1 m and released. What is its maximum speed?"}
+{"id": "g1", "domain": "chat", "prompt": "Write a short, polite email declining a meeting invitation and proposing two alternative times next week."}
+{"id": "g2", "domain": "chat", "prompt": "Summarize the main arguments for and against a four-day work week in a few bullet points."}
+{"id": "t1", "domain": "web", "text": "The river had flooded twice that spring, and by May the farmers along its banks had given up on the low fields. They moved the cattle to the ridge, where the grass was thinner but the ground stayed dry, and waited for the water to fall. Some of them used the time to mend fences; others went into town and sat in the cafe, talking about the weather as if it were a person who had wronged them."}
+{"id": "t2", "domain": "wiki", "text": "Photosynthesis is the process by which green plants, algae and some bacteria convert light energy into chemical energy. In plants it takes place mainly in the chloroplasts of leaf cells, where chlorophyll absorbs light, chiefly in the blue and red parts of the spectrum. The overall reaction combines carbon dioxide and water to form glucose and oxygen, and it is divided into light-dependent reactions and the Calvin cycle."}

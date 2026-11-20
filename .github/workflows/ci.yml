@@ -1,0 +1,113 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"  # nightly: the full CPU suite, slow tests included
+  workflow_dispatch:
+
+env:
+  OMP_NUM_THREADS: "4"
+
+jobs:
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked --no-default-groups --group docs
+      - run: uv run --no-sync sphinx-build -W --keep-going docs site
+
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: package layering
+        run: python tools/check_package_layers.py
+      - name: public tree
+        run: python tools/check_public_tree.py
+      # the ruff version uv.lock pins (lint needs no torch install)
+      - run: uvx ruff@0.17.3 check .
+      - run: uv sync --locked --no-default-groups --all-packages --extra dev
+      - name: generated docs (support matrix, CLI reference) match the code
+        run: uv run --no-sync python tools/gen_docs.py --check
+
+  typecheck:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # The checked packages and their dependencies (torch's annotations), without the default `user` group
+      # (vLLM). Every later `uv run` takes --no-sync.
+      - run: uv sync --locked --no-default-groups --all-packages --group dev
+      - run: uv run --no-sync pyright
+
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # qda-agent's sandbox tests start bubblewrap, which needs unprivileged user namespaces.
+      - run: |
+          sudo apt-get update -q && sudo apt-get install -yq bubblewrap
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      # The test env: every package and dev tools, without the default `user` group (vLLM). Every later
+      # `uv run` takes --no-sync: a plain `uv run` would sync the default group back in.
+      - run: uv sync --locked --no-default-groups --all-packages --extra dev
+      - name: the test env has no vLLM
+        run: uv run --no-sync python -c "import importlib.util as u, sys; sys.exit(u.find_spec('vllm') is not None)"
+      - name: fast tests (default selection; no GPU, no slow)
+        if: github.event_name != 'schedule'
+        run: uv run --no-sync pytest -q
+      - name: full CPU suite (slow included)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: uv run --no-sync pytest -q -m "not gpu"
+
+  # Each package's floor is the oldest Python its main command works on: qda-quant and qda-kl >=3.11
+  # (vLLM 0.33). The workspace needs 3.12 (qda-agent), so `uv sync` cannot make these envs: install the
+  # packages into a plain venv instead. This resolves fresh from PyPI (uv.lock covers 3.12 only), which is
+  # what a user on that Python gets. The 3.12 runs are the `test` job above.
+  test-py311:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv venv -p 3.11 .venv311
+      - run: uv pip install -p .venv311/bin/python -e "packages/qda-quant[dev,hf]" -e "packages/qda-kl[dev]"
+      - name: qda-quant tests on Python 3.11
+        run: .venv311/bin/python -m pytest -q packages/qda-quant/tests
+      - name: qda-kl tests on Python 3.11
+        run: .venv311/bin/python -m pytest -q packages/qda-kl/tests
+      # Scoring needs vLLM and a CUDA card, which this runner lacks; a dry run proves the pinned serving stack
+      # resolves on 3.11 without downloading it.
+      - name: qda-kl[vllm] resolves on Python 3.11
+        run: uv pip install --dry-run -p .venv311/bin/python -e "packages/qda-quant" -e "packages/qda-kl[vllm]"
+
+  test-py313:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv venv -p 3.13 .venv313
+      - run: uv pip install -p .venv313/bin/python -e "packages/qda-quant[dev,hf]" -e "packages/qda-kl[dev]"
+      - name: qda-quant tests on Python 3.13
+        run: .venv313/bin/python -m pytest -q packages/qda-quant/tests
+      - name: qda-kl tests on Python 3.13
+        run: .venv313/bin/python -m pytest -q packages/qda-kl/tests
+      - name: qda-kl[vllm] resolves on Python 3.13
+        run: uv pip install --dry-run -p .venv313/bin/python -e "packages/qda-quant" -e "packages/qda-kl[vllm]"

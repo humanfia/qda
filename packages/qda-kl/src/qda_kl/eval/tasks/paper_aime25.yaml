@@ -1,0 +1,24 @@
+# AIME 2025 as the paper asked and graded it (paper.py): its boxed-integer prompt, the strict last readable box
+# then the lenient patterns. The harness's own aime25 asks "Question: ...\nAnswer:" and is kept beside it.
+task: paper_aime25
+dataset_path: math-ai/aime25
+dataset_kwargs:
+  revision: 563bb8404243c5f09de6ec262f2db674fe5bce9b
+output_type: generate_until
+test_split: test
+process_docs: !function paper.aime_docs
+doc_to_text: prompt
+doc_to_target: gold
+process_results: !function paper.aime_results
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until: []
+  do_sample: false
+  temperature: 0.0
+  max_gen_toks: 32768
+num_fewshot: 0
+metadata:
+  version: 1.0

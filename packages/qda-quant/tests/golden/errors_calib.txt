@@ -1,0 +1,11 @@
+selfgen without sampling || calib.selfgen.sampling: no sampling settings: the model's generation_config.json names none and the config sets none\nfix: set calib.selfgen.sampling, e.g. '{"temperature": 1.0, "top_p": 0.95}'
+hub generation config with only eos || sampling: no sampling settings: the model's generation_config.json names none and the config sets none\nfix: set sampling, e.g. '{"temperature": 1.0, "top_p": 0.95}'
+fingerprint of a non-model dir || <tmp>: not a model directory (no config.json); pass the directory that holds the model
+fingerprint of a hub id || Qwen/Qwen3-8B: not a local directory; pass the model's local snapshot directory
+allocate all-zero weights || weights [0, 0]: need at least one positive, none negative; give a part a positive weight
+mix source shorter than its share || <tmp>/a.jsonl: 10 usable rows (0 rejected by the guard), its share is 20; add rows, lower its weight, or relax the guard
+mix token ids without fingerprint || <tmp>/a.jsonl: token-id rows without a tokenizer fingerprint (header row or sidecar)
+mix token ids of two tokenizers || token-id sources made by different tokenizers: ['t1', 't2']
+mix header and sidecar disagree || <tmp>/a.jsonl: tokenizer fingerprints disagree: {'header row': 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'a.jsonl.tokenizer': 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}
+mix header not a sha256 || <tmp>/a.jsonl: header row tokenizer 'not-a-digest' is not a sha256 hex digest
+ngram guard on token rows || NGramGuard cannot check token-id rows (no text); mix them without this guard

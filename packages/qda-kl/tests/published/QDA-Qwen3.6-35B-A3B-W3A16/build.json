@@ -1,0 +1,20 @@
+{
+ "source_repo": "Qwen/Qwen3.6-35B-A3B@995ad96eacd98c81ed38be0c5b274b04031597b0",
+ "format": "w3a16-sym-g128",
+ "target": "sm90@0.33.0",
+ "serve": {
+  "vllm": "0.33.0",
+  "env": {},
+  "args": {},
+  "plugins": [],
+  "kernels": {
+   "dense": [
+    "HummingLinearKernel",
+    "MacheteLinearKernel"
+   ],
+   "moe": [
+    "HummingIndexedExperts"
+   ]
+  }
+ }
+}

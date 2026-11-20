@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+build/
+dist/
+site/
+# quickstart outputs (README "Quick start")
+qwen3-0.6b-w4a16/
+qwen3-0.6b-ref/
+.qwen3-0.6b-ref.lock
+qwen3-0.6b-w4a16-eval/
+qwen3-0.6b-score/
+builds/

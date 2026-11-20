@@ -1,0 +1,11 @@
+part of fused q/k/v || format_overrides: 're:(.*\\.)?layers\\.(0)\\.self_attn\\.q_proj(\\.|$)' matches 1 of the 3 linears of model.layers.0.self_attn.q_proj; they are solved and served as one fused linear with one scheme: match them all
+part of fused gate/up || format_overrides: 're:(.*\\.)?layers\\.(0)\\.mlp\\.gate_proj(\\.|$)' matches 1 of the 2 linears of model.layers.0.mlp.gate_proj; they are solved and served as one fused linear with one scheme: match them all
+second activation scheme || format_overrides: model.layers.0.mlp.down_proj in w8a8-sym-g32 ('re:(.*\\.)?layers\\.(0)\\.mlp\\.down_proj(\\.|$)') quantizes activations as fp8_token, the body's bf16; the build runs one activation scheme over every linear of a layer
+default bf16 || config:\n  formats: default: bf16 leaves nothing to quantize; name the body format, e.g. default: w4a16-g128, and bf16 only the units that stay as they are
+empty recipe || config:\n  formats: expected a non-empty mapping of patterns to formats, e.g. {default: w4a16-g128, layers.0-3.mlp: w8a16-g32}
+range written high to low || config:\n  formats: 'layers.3-1.mlp': the layer range runs 3-1; write the lower index first
+unknown format || config:\n  formats: 'layers.0-1.mlp': unknown format 'w4a99'; expected e.g. 'w4a16-asym-g128'
+format not a string || config:\n  formats: 'layers.0-1.mlp': 4: patterns and formats are strings
+recipe beside format || config:\n  formats: a recipe sets `format`, `format_overrides` and `ignore` itself; a config states its per-unit formats with `formats` or with those keys, never both
+recipe beside format_overrides || config:\n  formats: a recipe sets `format`, `format_overrides` and `ignore` itself; a config states its per-unit formats with `formats` or with those keys, never both
+recipe beside ignore || config:\n  formats: a recipe sets `format`, `format_overrides` and `ignore` itself; a config states its per-unit formats with `formats` or with those keys, never both

@@ -1,0 +1,133 @@
+/* QDA docs on furo: white page, one accent (MIT red, set in conf.py) for links and the current page. */
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Text column ~46rem, generous line height. */
+.content {
+  width: 46rem;
+}
+
+article {
+  line-height: 1.7;
+}
+
+/* Headings: ink, semibold, a calm scale. */
+h1,
+h2,
+h3,
+h4 {
+  color: #1A1A1A;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 0.8rem;
+}
+
+h2 {
+  font-size: 1.45em;
+  margin-top: 2.6rem;
+}
+
+h3 {
+  font-size: 1.15em;
+}
+
+/* Tables: full width, thin horizontal rules, no fills, left-aligned unless the page aligns a column. */
+article table.docutils {
+  width: 100%;
+  border: 0;
+  border-collapse: collapse;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 0.86em;
+  line-height: 1.45;
+}
+
+article table.docutils th,
+article table.docutils td {
+  border-left: 0;
+  border-right: 0;
+  background: #FFFFFF;
+  padding: 0.45em 0.7em;
+  vertical-align: top;
+}
+
+article table.docutils th {
+  font-weight: 600;
+  text-align: left;
+  border-top: 1px solid #1A1A1A;
+  border-bottom: 1px solid #1A1A1A;
+}
+
+article table.docutils th.text-center {
+  text-align: center;
+}
+
+article table.docutils th.text-right {
+  text-align: right;
+}
+
+article table.docutils td {
+  border-top: 1px solid #E3E3E3;
+  border-bottom: 0;
+}
+
+article table.docutils tr:last-child td {
+  border-bottom: 1px solid #1A1A1A;
+}
+
+article table.docutils tbody tr:nth-child(odd) td {
+  background: #FFFFFF;
+}
+
+/* Code: flat light-gray box. */
+article .highlight pre,
+article pre {
+  background: #F6F6F6;
+  border-radius: 2px;
+  font-size: 0.84em;
+  line-height: 1.55;
+}
+
+article code.literal {
+  background: #F3F3F3;
+  border: 0;
+  border-radius: 2px;
+}
+
+/* Admonitions: gray rule, no colour fill. */
+.admonition {
+  border-left: 2px solid #E3E3E3;
+  box-shadow: none;
+  background: #FFFFFF;
+}
+
+.admonition > .admonition-title {
+  background: #FFFFFF;
+}
+
+/* Home page: teaser. */
+.qda-teaser {
+  width: 100%;
+  margin: 0.4rem 0 1rem;
+}
+
+/* Diagrams use the full text width. */
+article img[src$=".svg"] {
+  width: 100%;
+}
+
+/* Left nav: current page in red. */
+.sidebar-tree .current-page > .reference {
+  color: #A31F34;
+}
+
+/* One white scheme (light.js pins it): no light/dark toggle. */
+.theme-toggle-container {
+  display: none;
+}

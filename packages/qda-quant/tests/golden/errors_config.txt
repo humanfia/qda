@@ -1,0 +1,27 @@
+missing key || config:\n  model: missing required key
+unknown key || config:\n  bacth_size: unknown key
+unknown step || config:\n  unknown step 'gptqq'; known: ['autoround', 'awq', 'fisher_trace', 'gptaq', 'gptq', 'gsq', 'guided', 'head', 'permute', 'rotate', 'rtn', 'scale_kd', 'soup']
+unknown step key || config:\n  steps.0.gptq.dampp: unknown key
+step entry with two names || config:\n  steps.0: expected one {name: settings} entry, got {'gptq': {}, 'rotate': {}}
+step entry empty || config:\n  steps.0: expected one {name: settings} entry, got {}
+calib unknown key || config:\n  calib.file.sampels: unknown key
+calib missing key || config:\n  calib.file.path: missing required key
+hessian dtype || config:\n  hessian: hessian dtype 'fp16': expected bf16, tf32 or fp32
+hessian name || config:\n  hessian: hessian 'fastest': expected fast, default or {dtype, buffer_rows}
+hessian name (python) || hessian 'fastest': expected fast, default or {dtype, buffer_rows}
+hessian type (python build) || hessian 3: expected fast, default or {dtype, buffer_rows}
+no such config file || <tmp>/nope.yaml: [Errno 2] No such file or directory: '<tmp>/nope.yaml'; check the path and that the file is YAML
+out missing at build || config: missing required key 'out' (set it in the file or with --set out=DIR)
+model not found || model '<tmp>/no-such-model': no such directory
+set index past the end || <tmp>/b.yaml: --set steps.3.damp=1: steps has 2 entries; index 3 does not exist
+set index not a number || <tmp>/b.yaml: --set steps.x.damp=1: steps is a list; 'x' is not an index
+set into a string || <tmp>/b.yaml: --set model.x=1: model is str '<tmp>/m', not a mapping or a list
+set into a hessian name || <tmp>/b.yaml: --set hessian.dtype=fp32: hessian is str 'fast', not a mapping or a list
+set without a value || <tmp>/b.yaml: --set batch_size: expected KEY=VALUE
+set with bad yaml || <tmp>/b.yaml: --set batch_size=[1,:
+ignore a word that is no role || ignore: 'routers' matches no linear the build would quantize; an entry is a role (gdn_gates, shared_experts), an exact module name as `qda plan` prints it, or 're:' and a regex
+ignore matches no linear || ignore: 'model.layers.0.mlp.down' matches no linear the build would quantize; an entry is a role (gdn_gates, shared_experts), an exact module name as `qda plan` prints it, or 're:' and a regex
+ignore part of a fused linear || ignore: 'model.layers.0.self_attn.q_proj' keeps model.layers.0.self_attn.q_proj float but not the rest of ['model.layers.0.self_attn.q_proj', 'model.layers.0.self_attn.k_proj', 'model.layers.0.self_attn.v_proj']: vLLM serves them as one fused linear with one scheme; ignore all of them or none
+ignore a writer permute moves || permute: ignore 're:.*mlp\\.(gate|up)_proj$' keeps model.layers.0.mlp.gate_proj float, but permute finds the linears that write an MLP's intermediate channels among the quantized groups, so it would skip model.layers.0.mlp.gate_proj; quantize it, or build without permute
+drafts without rotate || config:\n  drafts: the build has no residual rotate step, so a draft runs on it as it is
+drafts without residual rotate || config:\n  drafts: the build has no residual rotate step, so a draft runs on it as it is

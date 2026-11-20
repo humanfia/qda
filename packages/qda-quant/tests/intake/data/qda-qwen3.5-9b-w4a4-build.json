@@ -1,0 +1,12 @@
+{
+ "source_repo": "Qwen/Qwen3.5-9B@c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+ "format": "w4a4-nvfp4",
+ "target": "sm100@0.33.0",
+ "serve": {
+  "vllm": "0.33.0",
+  "env": {},
+  "args": {},
+  "plugins": [],
+  "kernels": {}
+ }
+}

@@ -1,0 +1,16 @@
+# Gemma 3 4B (vision-language), GPTQ W4A16: the language model is quantized, the vision tower copied in bf16, and
+# stock vLLM serves the checkpoint with images.   qda build configs/gemma-3-4b-vlm.yaml
+# Calibration on image-question rows keeps the checkpoint closest to the original on image inputs but further from
+# it on general text than text calibration does. A `mix` of `vlm` and text keeps text as close and sits in between
+# on images. Sources: docs/recipe.md (Calibration data).
+#   calib: {mix: {samples: 128, parts: [{vlm: {}, weight: 1}, {hf: {<the quickstart's c4 settings>}, weight: 1}]}}
+# Data: HuggingFaceM4/the_cauldron, localized_narratives (descriptions of Open Images training images, CC BY 4.0;
+# Open Images lists each image's license), downloaded at build time at the pinned revision. Needs the `vlm` extra
+# (`pip install 'qda-quant[vlm]'`). Builds on one card, one sample per forward.
+model: google/gemma-3-4b-it@093f9f388b31de276ce2de164bdc2081324b9767  # Gemma terms of use
+format: w4a16-sym-g128
+out: gemma-3-4b-it-w4a16
+steps:
+  - gptq: {}
+calib:
+  vlm: {samples: 128, seqlen: 2048}

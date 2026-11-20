@@ -1,0 +1,14 @@
+# CPU fixture: the flow uses a scripted worker and an in-memory host.
+model: Qwen/Qwen3-8B
+format: w4a16
+budget_gpu_hours: 0.004
+cards: [0, 1]
+run_dir: ../../runs/scripted-flow
+baselines: [baselines/gptq, baselines/awq]
+commands: null
+host: testkit:fake_host
+drain_timeout_s: 10
+agent: {resend_wait_s: 0.5}
+judge: {eval_max_tokens: 32768}  # the final evaluation's generation cap
+isolation: {level: none}  # the CPU stand-in runs unconfined; the level is stated, not defaulted
+contamination: none  # CPU stand-ins: no guard file; the default ngram check needs one

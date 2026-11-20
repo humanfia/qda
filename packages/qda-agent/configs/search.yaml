@@ -1,0 +1,75 @@
+# The default search: `qda doctor --search packages/qda-agent/configs/search.yaml`, then
+# `qda-agent run packages/qda-agent/configs/search.yaml`.
+# Replace every <...> with a path on your machine, or set it with `--set key.path=value`.
+# Relative paths are relative to this file. Each plugin is `{name: KEY, ...its settings}`.
+model: <path/to/original-bf16-model>        # e.g. a local copy of Qwen/Qwen3-8B
+format: w4a16                               # w4a16 | w4a8 | w3a16 | w4a4
+budget_gpu_hours: 4                         # over all cards: 1 card -> deadline 4 h after the start
+cards: [0]                                  # the GPUs the search holds for its whole budget
+# a longer search: budget_gpu_hours: 32 with cards: [0, 1, 2, 3] -> 8 h
+run_dir: <path/to/runs/q8b-w4a16>           # a new directory per run; never under /tmp (the agent's fence writes it)
+calib: <path/to/calib.jsonl>                # the default calibration file the task statement names
+baselines: [<path/to/baseline-ckpt>]        # fallback order; the first is the hand-in when nothing valid exists
+agent:
+  # qda_agent.backends: claude | codex | dsh. dsh needs the SDK (pip install 'qda-agent[dsh]') and
+  # signs in with DEEPSEEK_API_KEY, sent to DEEPSEEK_BASE_URL (an OpenAI-compatible base; default
+  # https://api.deepseek.com; a gateway under /v1 names its /v1, as in https://gateway.example/v1). With
+  # account: ACCOUNT it uses that account's endpoint and ignores DEEPSEEK_BASE_URL. A run that names no model
+  # takes the one its endpoint serves: deepseek-flash on the official API, a gateway's own name on a gateway.
+  # Examples: {name: dsh} (the official API), {name: dsh, model: deepseek-v4.1-flash-1017}
+  backend: {name: claude, model: claude-opus-5-5, effort: high}
+  fallbacks: []                             # e.g. [{name: codex, model: gpt-5.6-sol, effort: high}]
+  retries: 3                                # Humanize's own retry at the same place
+  retry_policy: exponential-jitter
+  cost_usd: 400                             # API spend limit of the search
+# set strict (needs bubblewrap) to keep the agent away from the reference and cut its network
+isolation: {level: none}                    # none | sandbox | strict: the experiment wall, named here
+scheduler:                                  # qda_agent.schedulers
+  name: qsched
+  readable: [<path/to/original-bf16-model>] # read-only inputs of the agent's jobs
+launcher: {name: local}                     # qda_agent.launchers: the run in this process
+toolset:                                    # qda_agent.toolsets: the `qda` preset (all its components)
+  name: qda
+  python: <path/to/quant-venv/bin/python>   # torch + qda-quant: the agent's jobs and `qda` run with it
+  components:                               # qda_agent.components, in TASK.md order
+    - qda                                   # qda build / plan
+    - bpw                                   # bpw DIR / bpw --plan RECIPE.yaml: the judge's own bpw rule
+    - kl                                    # kl DIR / list / show
+    - gencheck                              # gencheck DIR / list / show: long generations, counts only
+    - qsched                                # the GPU queue
+    - handin
+    - wiki                                  # the quant-methods skill, read-only
+    - fisher                                # qda fisher map / allocate: per-unit sensitivity map
+    - probe                                 # python -m qda_agent.probe: RTN scheme on your own data
+    - {name: data, sets: {corpus: <path/to/corpus.jsonl>}}    # read-only datasets, listed in DATA.md; {} for none
+    - serve                                 # vLLM on the jobs' PATH: judge.serve_python unless python is set
+    - baselines                             # the baselines at baselines/<N> (neutral names)
+    - views                                 # model/ and baselines/<N>/: config, tokenizer, index (no weights)
+    - source                                # src/qda_quant: a copy the agent may patch; its jobs import it
+contamination:                              # qda_agent.contamination_checks: none | ngram
+  name: ngram
+  guard: <path/to/guard.txt>                # one window sha256 per line (test items)
+judge:
+  serve_python: <path/to/vllm-venv/bin/python>   # vLLM for KL readings and the serving check
+  kl_ref: <path/to/kl-reference>            # built once with `qda-kl ref`
+  kl_holdout_ref: <path/to/holdout-prompts.jsonl>   # prompts held out from the agent and calibration
+  anchor: <path/to/original-bf16-model>
+  format_reference: <path/to/baseline-ckpt> # a checkpoint of the task's format (the first baseline)
+  eval_max_tokens: 32768               # the final evaluation's generation cap for this row (paper: 81,920 Qwen / 32,768 Llama)
+  # One KL reading's card layout; its cards are derived (tp x pipeline_parallel_size). serve_args holds the
+  # other vllm.LLM split arguments, e.g. {enable_expert_parallel: true} for an MoE at TP 8. A reading whose
+  # command's --set values would make its scorer's tp or serve_args differ from this is refused: the layout
+  # comes from here alone:
+  # kl_layout: {tp: 1}
+  # A reading's expected time (admission only): the load over its cards, plus a fixed scoring time:
+  # kl_load_s_per_gib: 7.5
+  # kl_score_s: 60
+  # The largest checkpoint the judge takes; default: twice the anchor + 1 GiB, or 200 GiB without one:
+  # max_copy_bytes: 53687091200
+  # gencheck checks 4 prompts per domain at 8192 tokens: minutes per check (the original's answers are
+  # cached, so only the first check pays for them). The evaluation's length:
+  # gencheck_max_tokens: 32768
+  # gencheck_per_domain: 16
+# After the deadline, how long pending checks and readings may finish; default: one KL reading of the anchor
+# (at least 900 s), or 900 s without an anchor:
+# drain_timeout_s: 900

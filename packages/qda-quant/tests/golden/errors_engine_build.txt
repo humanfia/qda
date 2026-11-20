@@ -1,0 +1,19 @@
+dense solve offsets || gptq model.layers.0.self_attn.q_proj: a dense group is 128 x 64 = 8192 elements, past the 1000 one solve stays inside; a dense group is never split, and an expert's matrix is the smallest chunk
+expert matrix offsets || gptq model.layers.0.mlp.gate: an expert's matrix is 1024 x 128 = 131072 elements, past the 40000 one solve stays inside; a dense group is never split, and an expert's matrix is the smallest chunk
+factor row offsets || gptq model.layers.0.mlp.gate: the factor's rows are 512 x 512 = 262144 elements, past the 150000 one solve stays inside
+group size width || model.layers.0.self_attn.q_proj: 64 input columns at group size 128 (w4a16-asym-g128) is not a whole number of groups; 13 other module(s) have the same problem; group sizes that work: -1 (per channel), 32
+group size expert bank || model.layers.0.mlp.experts.down_proj: 32 input columns at group size 64 (w4a16-sym-g64) is not a whole number of groups; 0 other module(s) have the same problem; group sizes that work: -1 (per channel), 32
+group size head || lm_head: 64 input columns at group size 128 (w4a16-sym-g128) is not a whole number of groups; 1 other module(s) have the same problem; group sizes that work: -1 (per channel), 32, 64
+grid3 formats w4a16 || gptq clip='grid3': grid3 requires symmetric W4A8 g128 and a target with FP8 group scales
+grid3 formats g64 || w4a8-sym-g64 dense on sm90 vLLM 0.33.0: CUTLASS W4A8 takes int4, group 128, symmetric weights only
+grid3 formats asym g128 || w4a8-asym-g128 dense on sm90 vLLM 0.33.0: CUTLASS W4A8 takes int4, group 128, symmetric weights only
+grid3 without fp8 scales || gptq clip='grid3': grid3 requires symmetric W4A8 g128 and a target with FP8 group scales
+grid3 without gptq || rtn clip='grid3' requires GPTQ's Hessian-weighted solve
+ids beyond vocab || calibration <tmp>/big.jsonl: token ids span [1, 500], the model's vocab is [0, 128)
+mixed device request || devices [0, 1, 2, 3] mix two readings: with CUDA_VISIBLE_DEVICES=2,3,4,5, [2, 3] name physical cards and [0, 1] name logical ones. Pass only physical ids (2, 3, 4, 5) or only logical ones (0..3)
+mixed device request one short || devices [0, 1] mix two readings: with CUDA_VISIBLE_DEVICES=1,2, [1] name physical cards and [0] name logical ones. Pass only physical ids (1, 2) or only logical ones (0..1)
+repeated card physical || devices [4, 4] resolve to cuda:0, cuda:0: 4 and 4 both mean cuda:0. Pass each card once: physical ids (4, 5, 6) or logical ones (0..2)
+repeated card logical || devices [0, 0] resolve to cuda:0, cuda:0: 0 and 0 both mean cuda:0. Pass each card once: physical ids (4, 5, 6) or logical ones (0..2)
+hessian dtype || hessian dtype 'fp16': expected bf16, tf32 or fp32
+hessian buffer_rows || hessian buffer_rows -1: expected an integer >= 0 (0 = per sample)
+hessian unknown key || hessian: unknown keys ['rows']; expected dtype, buffer_rows

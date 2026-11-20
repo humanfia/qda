@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qda-agent"
+version = "0.1.0"
+description = "Budgeted LLM-agent search over quantization recipes (Humanize flow + GPU scheduler)"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = ["qda-quant", "qda-kl", "hmz>=0.2.2,<0.3", "pydantic>=2", "pyyaml"]
+
+[project.urls]
+Repository = "https://github.com/humanfia/qda"
+Documentation = "https://github.com/humanfia/qda/tree/main/docs"
+
+[project.optional-dependencies]
+vllm = ["qda-kl[vllm]"]  # the serve check and LiveCodeBench generation
+dsh = ["hmz[dsh]"]  # the DeepSeek Harness SDK `agent.backend.name: dsh` is driven through
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qda_agent"]
+
+[tool.hatch.build]
+artifacts = ["src/qda_agent/third_party/livecodebench/VENDOR.json", "src/qda_agent/third_party/livecodebench/LICENSE"]
+
+[project.scripts]
+qda-agent = "qda_agent.entry:main"
+
+[project.entry-points."qda.plugins"]
+qda_agent = "qda_agent.extensions:register"

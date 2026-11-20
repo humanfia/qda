@@ -1,0 +1,20 @@
+{
+ "repo": "https://github.com/LiveCodeBench/LiveCodeBench",
+ "commit": "28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24",
+ "commit_date": "2025-07-15T17:58:38-07:00",
+ "license": "MIT (LICENSE, copied verbatim)",
+ "rewrite": [],
+ "note": "Only the official test runner is vendored: the stdin/stdout runner, the functional (call-based) runner and their output-comparison rules are all in testing_util.py, unmodified. The grader runs all cases of one program per sandbox (qda_agent.livecodebench); grade_one.py, paper.py (the paper's runner, protocol: paper) and __init__.py in this directory are QDA's, not upstream. The test cases are not vendored: they are downloaded from livecodebench/code_generation_lite, pinned to revision 0fe84c3912ea0c4d4a78037083943e8f0c4dd505.",
+ "files": {
+  "testing_util.py": {
+   "upstream_path": "lcb_runner/evaluation/testing_util.py",
+   "upstream_sha256": "sha256:b7cb6a8a69807bb868150a61742e25d7bb5328bbe01d514471b6ec43c9fa9ed2",
+   "vendored_sha256": "sha256:b7cb6a8a69807bb868150a61742e25d7bb5328bbe01d514471b6ec43c9fa9ed2"
+  },
+  "LICENSE": {
+   "upstream_path": "LICENSE",
+   "upstream_sha256": "sha256:104099948b78ebc36f2e951b3a7973b956adfa7d39aaec0d1512f97a2686d15d",
+   "vendored_sha256": "sha256:104099948b78ebc36f2e951b3a7973b956adfa7d39aaec0d1512f97a2686d15d"
+  }
+ }
+}

@@ -1,0 +1,18 @@
+{
+ "source_repo": "Qwen/Qwen3.5-4B@851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+ "format": "w3a16-sym-g128",
+ "target": "sm90@0.33.0:humming",
+ "serve": {
+  "vllm": "0.33.0",
+  "env": {
+   "VLLM_DISABLED_KERNELS": "MacheteLinearKernel"
+  },
+  "args": {},
+  "plugins": [],
+  "kernels": {
+   "dense": [
+    "HummingLinearKernel"
+   ]
+  }
+ }
+}

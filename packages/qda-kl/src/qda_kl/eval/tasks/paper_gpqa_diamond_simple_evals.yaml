@@ -1,0 +1,26 @@
+# GPQA-Diamond with openai/simple-evals' multiple-choice prompt, which the paper asks for on
+# DeepSeek-R1-Distill-Llama-8B (App. B). Same items, option shuffle and gold as paper_gpqa_diamond; only the
+# prompt differs. Graded the same: the strict last readable box, then the lenient "Answer: X" patterns.
+task: paper_gpqa_diamond_simple_evals
+dataset_path: Idavidrein/gpqa
+dataset_name: gpqa_diamond
+dataset_kwargs:
+  revision: 83022cefff930aea54f654c0b282e74b9eeda5c6
+output_type: generate_until
+test_split: train
+process_docs: !function paper.gpqa_simple_evals_docs
+doc_to_text: prompt
+doc_to_target: gold
+process_results: !function paper.gpqa_results
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until: []
+  do_sample: false
+  temperature: 0.0
+  max_gen_toks: 32768
+num_fewshot: 0
+metadata:
+  version: 1.0

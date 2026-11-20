@@ -1,0 +1,33 @@
+# GPQA-Diamond with the paper's extraction: the strict "The answer is (X)" first, the lenient "(X)" only when
+# the strict extractor finds nothing. lm-evaluation-harness offers the two as separate metrics, not this rule.
+task: gpqa_diamond
+dataset_path: Idavidrein/gpqa
+dataset_name: gpqa_diamond
+dataset_kwargs:
+  revision: 83022cefff930aea54f654c0b282e74b9eeda5c6
+output_type: generate_until
+process_docs: !function utils.process_docs
+training_split: train
+test_split: train
+doc_to_text: "What is the correct answer to this question:{{Question}}\nChoices:\n(A) {{choice1}}\n(B) {{choice2}}\n(C) {{choice3}}\n(D) {{choice4}}\nAnswer:"
+doc_to_target: "{{answer}}"
+num_fewshot: 0
+filter_list:
+  - name: "strict-then-loose"
+    filter:
+      - function: "custom"
+        filter_fn: !function utils.strict_then_loose
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "</s>"
+    - "Question:"
+    - "<|im_end|>"
+  do_sample: false
+  temperature: 0.0
+  max_gen_toks: 32768
+metadata:
+  version: 1.0

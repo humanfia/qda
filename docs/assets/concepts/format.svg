@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 190" width="720" height="190" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14" fill="#000">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#000"/></marker></defs>
+<rect width="720" height="190" fill="#fff"/>
+<g text-anchor="middle" font-size="26">
+<text x="110" y="44" font-weight="bold" fill="#A31F34">w4</text>
+<text x="270" y="44" font-weight="bold">a16</text>
+<text x="440" y="44" font-weight="bold">asym</text>
+<text x="610" y="44" font-weight="bold">g128</text>
+</g>
+<g text-anchor="middle" fill="#5E5E5E" font-size="13">
+<text x="110" y="66">4-bit weight codes</text>
+<text x="270" y="66">bf16 activations</text>
+<text x="440" y="66">with a zero point</text>
+<text x="610" y="66">128 weights per scale</text>
+</g>
+<g stroke="#000" stroke-width="1">
+<rect x="40" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="60" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="80" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="100" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="120" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="140" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="160" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="180" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="200" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="220" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="240" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="260" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="280" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="300" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="320" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="340" y="100" width="20" height="28" fill="#D5D5D5"/>
+<rect x="360" y="100" width="20" height="28" fill="#fff"/>
+<rect x="380" y="100" width="20" height="28" fill="#fff"/>
+<rect x="400" y="100" width="20" height="28" fill="#fff"/>
+<rect x="420" y="100" width="20" height="28" fill="#fff"/>
+<rect x="440" y="100" width="20" height="28" fill="#fff"/>
+<rect x="460" y="100" width="20" height="28" fill="#fff"/>
+<rect x="480" y="100" width="20" height="28" fill="#fff"/>
+<rect x="500" y="100" width="20" height="28" fill="#fff"/>
+<rect x="520" y="100" width="20" height="28" fill="#fff"/>
+<rect x="540" y="100" width="20" height="28" fill="#fff"/>
+<rect x="560" y="100" width="20" height="28" fill="#fff"/>
+<rect x="580" y="100" width="20" height="28" fill="#fff"/>
+<rect x="600" y="100" width="20" height="28" fill="#fff"/>
+<rect x="620" y="100" width="20" height="28" fill="#fff"/>
+<rect x="640" y="100" width="20" height="28" fill="#fff"/>
+<rect x="660" y="100" width="20" height="28" fill="#fff"/>
+</g>
+<g stroke="#A31F34" stroke-width="2" fill="none">
+<path d="M40,138 L40,146 L360,146 L360,138"/><path d="M360,138 L360,146 L680,146 L680,138"/>
+</g>
+<g text-anchor="middle">
+<text x="200" y="168">group 1: one scale, one zero point</text>
+<text x="520" y="168">group 2: one scale, one zero point</text>
+<text x="360" y="92" fill="#5E5E5E" font-size="13">one row of a weight matrix, along its input dimension (cells not to scale)</text>
+</g>
+</svg>

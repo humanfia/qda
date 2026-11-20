@@ -1,0 +1,21 @@
+# Build with `qda build configs/quickstart.yaml`. Hub calibration requires the `hf` extra.
+# The dataset card lists Apache-2.0 and says its sources are under Apache-2.0 or MIT.
+# Short chat rows are packed in order. `rows` caps the input rows available to fill `samples`.
+# `residency: stream` keeps weights in host memory and moves one layer at a time to the GPU.
+# `when: accepted` skips `rotate` if planning refuses it. Qwen3-0.6B ties its embeddings, so this build uses GPTQ alone.
+model: Qwen/Qwen3-0.6B@c1899de289a04d12100db370d81485cdf75e47ca  # Apache-2.0; the revision pins the weights
+format: w4a16-asym-g128
+out: qwen3-0.6b-w4a16
+steps:
+  - rotate: {residual: true, when: accepted}
+  - gptq: {actorder: static, damp: 0.01, clip: hmse}
+calib:
+  hf:
+    dataset: mlabonne/open-perfectblend
+    revision: af60f3c18201652a83a93f46fcfee1b646ba3df7
+    split: train
+    column: conversations
+    rows: 1024
+    samples: 125
+    seqlen: 2048
+residency: stream

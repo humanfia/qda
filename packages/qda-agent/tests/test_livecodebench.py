@@ -37,6 +37,16 @@ YES = [{"input": "", "output": "yes"}]
 PROCS = ["private", "host-readonly"]
 
 
+@pytest.fixture
+def two_cores():
+    """Skips on a host with one physical core: grading reserves whole cores (SMT siblings included) and keeps
+    one apart for the engine, so the grader's CPU choice refuses there before any program is graded."""
+    available = os.sched_getaffinity(0)
+    cores = {frozenset(LiveCodeBenchSuite._siblings({cpu})) for cpu in available}
+    if len(cores) < 2:
+        pytest.skip(f"{len(available)} CPUs on one physical core: the grader and the engine need one each")
+
+
 @lru_cache(maxsize=1)
 def _private_proc_refused() -> bool:
     """Whether this container refuses a fresh proc mount, so the strict-mode cases cannot run here."""
@@ -106,6 +116,7 @@ def test_official_state_and_separate_compilation_and_case_budgets(tmp_path, proc
     assert grade_code(code, "count", cases, tmp_path, 1.0, proc=proc) == (True, 2, 0, 0)
 
 
+@pytest.mark.usefixtures("two_cores")
 @pytest.mark.parametrize("retry_pass", [True, False])
 def test_timeout_retry_waits_for_the_parallel_chunk_and_replaces_the_score(tmp_path, monkeypatch, retry_pass):
     suite = LiveCodeBenchSuite(repeats=2)
@@ -510,6 +521,7 @@ def test_private_cases_decode_without_importing_what_the_payload_names():
         cases_of({**row, "private_test_cases": evil})
 
 
+@pytest.mark.usefixtures("two_cores")
 def test_a_missing_dataset_row_refuses_instead_of_scoring_zero(tmp_path):
     suite = LiveCodeBenchSuite(data=str(tmp_path))
     items = [{"id": "absent", "prompt": "", "difficulty": "easy"}]
@@ -517,6 +529,7 @@ def test_a_missing_dataset_row_refuses_instead_of_scoring_zero(tmp_path):
         suite._grade(items, [[None]], tmp_path / "scratch", sandbox="bwrap")
 
 
+@pytest.mark.usefixtures("two_cores")
 def test_repeated_programs_keep_their_draw_scores(monkeypatch, tmp_path):
     """Deduplicating grader work must retain draw order and count an absent program as a failure."""
     import qda_agent.livecodebench as lcb
@@ -542,6 +555,7 @@ def test_repeated_programs_keep_their_draw_scores(monkeypatch, tmp_path):
     assert counts["no_code"] == 1
 
 
+@pytest.mark.usefixtures("two_cores")
 def test_unfinished_thinking_is_not_graded_and_scores_zero(monkeypatch, tmp_path):
     """A code fence inside an unclosed think block is not an answer; a closed one is graded."""
     import qda_agent.livecodebench as lcb
@@ -644,6 +658,7 @@ def test_a_closing_tag_suite_keeps_special_tokens_in_the_stored_text(monkeypatch
     assert params and all(param.skip_special_tokens is True for param in params)
 
 
+@pytest.mark.usefixtures("two_cores")
 def test_without_a_close_tag_the_whole_generation_is_an_answer(monkeypatch, tmp_path):
     """A checkpoint that does not think keeps the extraction it had before think_end_token existed."""
     import qda_agent.livecodebench as lcb

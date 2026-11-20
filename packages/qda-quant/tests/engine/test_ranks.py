@@ -141,7 +141,7 @@ def fake_ranks(monkeypatch):
 
 
 @pytest.mark.parametrize("nvls", [False, True])
-@pytest.mark.usefixtures("python_headers")  # the build compiles Triton's driver for the faked cards
+@pytest.mark.usefixtures("triton_driver")  # the build compiles Triton's driver for the faked cards
 def test_build_starts_ranks_before_the_plan_and_closes_them_on_a_refusal(
     fake_ranks, monkeypatch, tmp_path, nvls
 ):
@@ -160,7 +160,7 @@ def test_build_starts_ranks_before_the_plan_and_closes_them_on_a_refusal(
     assert fake_ranks == [f"start 2 nvls={nvls}", "plan", "close"]
 
 
-@pytest.mark.usefixtures("python_headers")  # the build compiles Triton's driver for the faked cards
+@pytest.mark.usefixtures("triton_driver")  # the build compiles Triton's driver for the faked cards
 def test_a_recipe_of_layer_steps_with_no_statistics_runs_on_one_card(fake_ranks, monkeypatch, tmp_path):
     """RTN on minmax has no forward pass to shard: several cards run one process on the first of them."""
     planned: list[list] = []

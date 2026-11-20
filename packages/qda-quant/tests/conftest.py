@@ -165,3 +165,14 @@ def python_headers():
     include = Path(sysconfig.get_paths()["include"])
     if not (include / "Python.h").is_file():
         pytest.skip(f"no Python.h in {include}: make the venv from a uv-managed Python")
+
+
+@pytest.fixture
+def triton_driver(python_headers):
+    """Skips where Triton's CUDA driver cannot link: a build that names cards compiles it before anything else,
+    and the link needs ``libcuda.so.1``, which a host without an NVIDIA driver (a CPU CI runner) does not have."""
+    from qda_quant import checks
+
+    check = checks.check_triton_build()
+    if not check.ok and "libcuda.so.1" in check.detail:
+        pytest.skip("no libcuda.so.1 to link Triton's driver against (no NVIDIA driver on this host)")

@@ -1610,6 +1610,7 @@ def test_supervisor_tool_log_is_written_inside_the_wall(tmp_path, monkeypatch, r
                 "host": "testkit:fake_host",
                 "commands": None,
                 "drain_timeout_s": 1,
+                "judge": {"eval_max_tokens": 32768},  # the task statement states the final evaluation's cap
             }
         )
     )

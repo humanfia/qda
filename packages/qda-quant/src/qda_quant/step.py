@@ -251,10 +251,9 @@ def _probe_name(model: Any) -> str:
 
 def _failing_module(model: Any, exc: BaseException) -> str | None:
     """The deepest module of `model` whose frame raised `exc`, or None when no frame's `self` is one."""
-    named = getattr(model, "named_modules", None)
-    if not callable(named):
+    if not callable(getattr(model, "named_modules", None)):
         return None
-    names = {id(module): name for name, module in named() if name}
+    names = {id(module): name for name, module in model.named_modules() if name}
     found = None
     traceback = exc.__traceback__
     while traceback is not None:

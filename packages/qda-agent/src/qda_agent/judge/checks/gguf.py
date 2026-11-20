@@ -329,8 +329,7 @@ def _type_problem(
                     f"output.weight is stored as {kind}; this model's release stores the output head as {head} "
                     "(judge.head): keep that type"
                 )
-        off_menu0 = want is not None and allowed is not None and _ggml_name(want) not in allowed
-        if off_menu0:
+        if want is not None and allowed is not None and _ggml_name(want) not in allowed:
             if want != t.tensor_type:
                 return (
                     f"{name} is stored as {kind}, but candidate 0 stores it as {_ggml_name(want)} (a type off "

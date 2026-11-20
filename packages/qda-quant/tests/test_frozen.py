@@ -2,6 +2,7 @@
 
 import argparse
 import importlib
+import importlib.util
 import json
 from pathlib import Path
 
@@ -71,6 +72,8 @@ def test_the_cli_commands_are_frozen(monkeypatch: pytest.MonkeyPatch) -> None:
     with pytest.raises(SystemExit):
         cli.main([])
     (sub,) = [a for a in parsers[0]._actions if isinstance(a, argparse._SubParsersAction)]
+    # qda-agent adds `probe`: an env of qda-quant and qda-kl alone (qda-agent needs Python 3.12+) has none
+    probe = ("probe",) if importlib.util.find_spec("qda_agent") is not None else ()
     assert list(sub.choices) == [
         *(
             "build",
@@ -82,5 +85,5 @@ def test_the_cli_commands_are_frozen(monkeypatch: pytest.MonkeyPatch) -> None:
             "calib",
             "export",
         ),
-        *("pipeline", "sensitivity", "decode-gguf", "eval", "probe", "rotate-draft", "traces"),
+        *("pipeline", "sensitivity", "decode-gguf", "eval", *probe, "rotate-draft", "traces"),
     ]

@@ -60,13 +60,22 @@ jobs:
       - run: |
           sudo apt-get update -q && sudo apt-get install -yq bubblewrap
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      # A run keeps a free-space floor on its disk (10 GB by default, `judge.min_free_bytes`), which every judge
+      # test's run_dir and the sandbox tests' runs/ inherit; after the torch install the runner has less. Drop the
+      # preinstalled toolchains these tests never use, so the tests see a disk like a developer's.
+      - name: free disk space for the run's free-space floor
+        run: |
+          df -h / /tmp
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h / /tmp
       # The test env: every package and dev tools, without the default `user` group (vLLM). Every later
       # `uv run` takes --no-sync: a plain `uv run` would sync the default group back in.
       - run: uv sync --locked --no-default-groups --all-packages --extra dev
       - name: the test env has no vLLM
         run: uv run --no-sync python -c "import importlib.util as u, sys; sys.exit(u.find_spec('vllm') is not None)"
+      # A manual run takes the full suite below, which holds these: running both would take the job twice as long.
       - name: fast tests (default selection; no GPU, no slow)
-        if: github.event_name != 'schedule'
+        if: github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'
         run: uv run --no-sync pytest -q
       - name: full CPU suite (slow included)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -74,8 +83,10 @@ jobs:
 
   # Each package's floor is the oldest Python its main command works on: qda-quant and qda-kl >=3.11
   # (vLLM 0.33). The workspace needs 3.12 (qda-agent), so `uv sync` cannot make these envs: install the
-  # packages into a plain venv instead. This resolves fresh from PyPI (uv.lock covers 3.12 only), which is
-  # what a user on that Python gets. The 3.12 runs are the `test` job above.
+  # packages into a plain venv instead. This resolves fresh from PyPI (uv.lock covers 3.12 only), with torch
+  # and transformers held at the versions the `test` job's env has (uv.lock's dev resolution), so the three
+  # Pythons test one stack. The 3.12 runs are the `test` job above. The serving stack's pins (constraints.txt,
+  # vLLM's torch and transformers) are checked by the dry run at the end.
   test-py311:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -85,7 +96,12 @@ jobs:
         with:
           enable-cache: true
       - run: uv venv -p 3.11 .venv311
-      - run: uv pip install -p .venv311/bin/python -e "packages/qda-quant[dev,hf]" -e "packages/qda-kl[dev]"
+      - name: torch and transformers as the test env has them
+        run: |
+          uv export --frozen --no-default-groups --all-packages --extra dev --no-hashes --no-emit-workspace \
+            --no-header | grep -E '^(torch|transformers)==' | tee "$RUNNER_TEMP/test-pins.txt"
+          test "$(wc -l < "$RUNNER_TEMP/test-pins.txt")" -eq 2  # both pinned, or the install would float
+      - run: uv pip install -p .venv311/bin/python -c "$RUNNER_TEMP/test-pins.txt" -e "packages/qda-quant[dev,hf]" -e "packages/qda-kl[dev]"
       - name: qda-quant tests on Python 3.11
         run: .venv311/bin/python -m pytest -q packages/qda-quant/tests
       - name: qda-kl tests on Python 3.11
@@ -93,7 +109,7 @@ jobs:
       # Scoring needs vLLM and a CUDA card, which this runner lacks; a dry run proves the pinned serving stack
       # resolves on 3.11 without downloading it.
       - name: qda-kl[vllm] resolves on Python 3.11
-        run: uv pip install --dry-run -p .venv311/bin/python -e "packages/qda-quant" -e "packages/qda-kl[vllm]"
+        run: uv pip install --dry-run -p .venv311/bin/python -c constraints.txt -e "packages/qda-quant" -e "packages/qda-kl[vllm]"
 
   test-py313:
     runs-on: ubuntu-24.04
@@ -104,10 +120,15 @@ jobs:
         with:
           enable-cache: true
       - run: uv venv -p 3.13 .venv313
-      - run: uv pip install -p .venv313/bin/python -e "packages/qda-quant[dev,hf]" -e "packages/qda-kl[dev]"
+      - name: torch and transformers as the test env has them
+        run: |
+          uv export --frozen --no-default-groups --all-packages --extra dev --no-hashes --no-emit-workspace \
+            --no-header | grep -E '^(torch|transformers)==' | tee "$RUNNER_TEMP/test-pins.txt"
+          test "$(wc -l < "$RUNNER_TEMP/test-pins.txt")" -eq 2  # both pinned, or the install would float
+      - run: uv pip install -p .venv313/bin/python -c "$RUNNER_TEMP/test-pins.txt" -e "packages/qda-quant[dev,hf]" -e "packages/qda-kl[dev]"
       - name: qda-quant tests on Python 3.13
         run: .venv313/bin/python -m pytest -q packages/qda-quant/tests
       - name: qda-kl tests on Python 3.13
         run: .venv313/bin/python -m pytest -q packages/qda-kl/tests
       - name: qda-kl[vllm] resolves on Python 3.13
-        run: uv pip install --dry-run -p .venv313/bin/python -e "packages/qda-quant" -e "packages/qda-kl[vllm]"
+        run: uv pip install --dry-run -p .venv313/bin/python -c constraints.txt -e "packages/qda-quant" -e "packages/qda-kl[vllm]"

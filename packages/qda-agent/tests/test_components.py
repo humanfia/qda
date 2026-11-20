@@ -452,6 +452,7 @@ def test_a_turn_the_wall_refuses_fails_the_run(tmp_path, monkeypatch):
         sandbox="bwrap",
         drain_timeout_s=5,
         baselines=[str(base)],
+        isolation={"level": "strict"},  # the fixture names `none`; this test runs the real wall
     )
     raw["judge"]["evaluator"] = str(EXAMPLES / "standin_kl")
     _abs_refs(raw)
@@ -463,10 +464,14 @@ def test_a_turn_the_wall_refuses_fails_the_run(tmp_path, monkeypatch):
         report = (run / "END-REPORT.md").read_text()
         if result["ended"].startswith("refused: the private socket directory "):
             assert "(through /planted)" in result["ended"], result
-            assert "**The run failed.** The wall refused: the private socket directory" in report
+            # the first turn was refused, so no turn ran: the report's head says so and names the refusal
+            assert (
+                "**The agent never ran.** the agent never ran (WallRefused: the private socket directory"
+                in report
+            )
         else:
             assert result["ended"] == "fatal: HarnessSandboxed", result
-            assert "**The run failed.** The agent phase ended fatal: HarnessSandboxed" in report
+            assert "**The agent never ran.** the agent never ran (" in report
         assert result["end_kind"] in ("refused", "fatal") and result["goals"] == 1, result
         assert result["rule"] == "handin" and (run / "FINAL.json").is_file()
         events = [json.loads(x)["ev"] for x in (run / "flow.jsonl").read_text().splitlines()]

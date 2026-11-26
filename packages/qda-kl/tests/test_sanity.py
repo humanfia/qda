@@ -473,3 +473,86 @@ def test_each_rule_catches_its_own_violation(change: str, rule: str) -> None:
     assert got is not None
     assert got["rules"][rule] == 0.0
     assert got["prompt_rate"] == 0.0
+
+
+#: A thinking template: the block opens in the prompt (or closes there with thinking off).
+THINKING_TEMPLATE = (
+    "{%- if enable_thinking is false %}{{- '<think>\\n\\n</think>\\n\\n' }}"
+    "{%- else %}{{- '<think>\\n' }}{%- endif %}"
+)
+#: A thinking model's numbered drafts, before its closing tag and the answer.
+DRAFTED = "We need five sections.\n1. Draft\n2. Draft\n3. Draft\nGood.\n"
+GEMMA = "<|channel>thought\n" + DRAFTED + "<channel|>" + GOOD
+
+
+def _run_instruction(tmp_path, monkeypatch, text: str, **settings: Any) -> Any:
+    """The instruction prompt answered with ``text`` by a local thinking model that no released card names."""
+    model = tmp_path / "fine-tune"
+    model.mkdir()
+    (model / "chat_template.jinja").write_text(THINKING_TEMPLATE)
+    _offline(monkeypatch, _measure_with(text=text))
+    suite = SanitySuite(domains=["instruction"], per_domain=1, **settings)
+    suite.prepare(str(model), tmp_path)
+    return suite.run(str(model), str(model), tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("text", "settings", "tag"),
+    [
+        (DRAFTED + "</think>\n\n" + GOOD, {}, "</think>"),
+        (GEMMA, {"think_end_token": "<channel|>"}, "<channel|>"),
+    ],
+)
+def test_a_thinking_answer_is_checked_after_its_closing_tag(tmp_path, monkeypatch, text, settings, tag):
+    """Numbered drafts in the thinking break every rule; only the text after the tag is the answer."""
+    whole = constraints.score([text])
+    assert whole is not None and whole["instruction_rate"] == 0.0
+    result = _run_instruction(tmp_path, monkeypatch, text, **settings)
+    assert result.metrics["constraint_pass_rate"] == 1.0
+    assert result.detail["constraints"]["think_end_token"] == tag
+
+
+@pytest.mark.parametrize("opened", ["<think>\n", ""], ids=["in-the-answer", "in-the-prompt"])
+def test_an_answer_that_never_closes_its_thinking_fails_every_rule(tmp_path, monkeypatch, opened) -> None:
+    """Thinking cut off at the cap is not an answer, even when it drafts a conforming one."""
+    result = _run_instruction(tmp_path, monkeypatch, opened + GOOD)
+    assert result.metrics["constraint_pass_rate"] == 0.0
+
+
+def test_with_thinking_off_the_whole_answer_is_checked(tmp_path, monkeypatch) -> None:
+    """The template closes the block in the prompt, so the answer carries no tag and is all answer."""
+    result = _run_instruction(tmp_path, monkeypatch, GOOD, chat_template_kwargs={"enable_thinking": False})
+    assert result.metrics["constraint_pass_rate"] == 1.0
+    assert result.detail["constraints"]["think_end_token"] is None
+
+
+def test_answers_cut_at_a_tag_keep_special_tokens_at_decode(monkeypatch) -> None:
+    """A special-token tag (Gemma's) survives decoding only with skip_special_tokens off."""
+    params: list[dict[str, Any]] = []
+
+    class Engine:
+        def __init__(self, **kwargs):
+            pass
+
+        def collective_rpc(self, name):
+            return [{}]
+
+        def get_tokenizer(self):
+            return SimpleNamespace(chat_template=None)
+
+        def generate(self, jobs, sampling, **kwargs):
+            params.extend(sampling)
+            return [
+                SimpleNamespace(outputs=[SimpleNamespace(text="a", token_ids=[1], finish_reason="stop")])
+                for _ in jobs
+            ]
+
+    fake = SimpleNamespace(LLM=Engine, TokensPrompt=dict, SamplingParams=lambda **kwargs: kwargs)
+    monkeypatch.setitem(sys.modules, "vllm", fake)
+    monkeypatch.setattr(qda_serve, "start_engine", lambda settings, start: start())
+    monkeypatch.setattr(sanity, "_mtp_layers", lambda model: 0)
+    monkeypatch.setattr(sanity, "prompt_token_ids", lambda *args, **kwargs: [1])
+    for settings, skip in (({}, True), ({"think_end_token": "<channel|>"}, False)):
+        suite = SanitySuite(domains=["math"], per_domain=1, **settings)
+        suite._measure("model", suite._settings(), suite._prompts(), {"temperature": 0.0})
+        assert params.pop()["skip_special_tokens"] is skip

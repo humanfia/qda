@@ -30,6 +30,7 @@ __all__ = [
     "card_sampling",
     "row_of",
     "template_think_end",
+    "think_end_of",
 ]
 
 
@@ -310,6 +311,15 @@ def template_think_end(model: str) -> str | None:
             continue
         templates.append(text)
     return next((tag for tag in THINK_END_TOKENS if any(tag in text for text in templates)), None)
+
+
+def think_end_of(reference: str, checkpoints: Sequence[str] = ()) -> str | None:
+    """The closing thinking tag a model's answers are cut at: its released card's, else its chat template's.
+
+    ``full`` (whose default row reads the template) and the ``sanity`` suite resolve the tag alike.
+    """
+    row, _ = row_of(reference, checkpoints)
+    return row.think_end_token if row is not None else template_think_end(reference)
 
 
 def _refuse_two_lines(reason: str) -> Refused:

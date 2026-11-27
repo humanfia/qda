@@ -12,7 +12,9 @@ per domain by default), and reports four checks:
   comparison :func:`qda_kl.gencheck.build_report` makes against the original's answers;
 * ``constraint_pass_rate``: the shipped instruction prompts ask for five numbered sections, a heading and an
   example in each, and a one-sentence summary; :mod:`qda_kl.eval.constraints` checks each answer. Those four rules
-  belong to that prompt set, so a custom set with instruction rows is refused before an engine loads;
+  belong to that prompt set, so a custom set with instruction rows is refused before an engine loads. A
+  thinking model's answer is checked after its closing thinking tag (``think_end_token``): drafts in its
+  thinking are not the answer, and an answer that never closes its thinking fails every rule;
 * ``mtp_acceptance_rate`` and its ratio to the original's, when the checkpoint's config names MTP layers: the
   engine runs vLLM's MTP draft and :func:`qda_kl.eval.specdec.read_spec_metrics` reads the counters. A checkpoint
   that reports none while the original's record has them scores 0.0: it cannot silently drop the head.
@@ -57,6 +59,8 @@ from qda_quant.calib.selfgen import resolve_sampling, sampling_params
 from qda_kl.cli import publish
 from qda_kl.engine_params import DEFAULT_GPU_MEMORY_UTILIZATION
 from qda_kl.eval import constraints
+from qda_kl.eval.full_preset import think_end_of
+from qda_kl.eval.lm_eval import answer_region
 from qda_kl.eval.specdec import read_spec_metrics
 from qda_kl.eval.suites import Layout, SuiteResult, locked, sha256_rows
 from qda_kl.gencheck import (
@@ -131,6 +135,10 @@ class SanitySuite(Layout):
             the original's ``generation_config.json``. None: that file alone, or greedy when it names nothing
             (several ``seeds`` refuse greedy).
         chat_template_kwargs: extra chat-template arguments, such as ``{"enable_thinking": false}``.
+        think_end_token: the closing thinking tag; an instruction answer is checked after its first
+            occurrence, and one without it fails. Unset: the model's released card's tag, else its chat
+            template's (:func:`qda_kl.eval.full_preset.think_end_of`); none when ``enable_thinking`` is
+            false.
         seed: the first sampling seed, the same for both models; the headline numbers are this seed's.
         seeds: the sampling seeds, each answered by both models in the same engine (default: just ``seed``).
             The first is ``seed``. A seed is part of the original's reference key, because its answers differ.
@@ -152,6 +160,7 @@ class SanitySuite(Layout):
     max_tokens: int = Field(default=16384, ge=1)
     sampling: dict[str, Any] | None = None
     chat_template_kwargs: dict[str, Any] = Field(default_factory=dict)
+    think_end_token: str | None = Field(default=None, min_length=1)
     seed: int = 17
     seeds: list[int] = Field(default_factory=list)
     num_speculative_tokens: int = Field(default=1, ge=1)
@@ -185,6 +194,9 @@ class SanitySuite(Layout):
         set that refuses keeps the configured ``serve_args``: the job is refused before an engine starts.
         """
         settings = self.model_dump(mode="json")
+        if settings["think_end_token"] is None:
+            # resolved per model and recorded in the result; a config that does not set it keeps its digest
+            del settings["think_end_token"]
         with contextlib.suppress(ValueError):
             settings["serve_args"] = self._engine_args()
         return {self.name: settings}
@@ -307,11 +319,14 @@ class SanitySuite(Layout):
         }
         if answers is not None:
             detail["answers"] = answers
-        scored = constraints.score([row.text for row in first if row.domain == "instruction"])
+        think = self._think_end(checkpoint)
+        scored = constraints.score(
+            [answer_region(row.text, think) for row in first if row.domain == "instruction"]
+        )
         if scored is not None:
             metrics["constraint_pass_rate"] = scored["instruction_rate"]
             higher["constraint_pass_rate"] = True
-            detail["constraints"] = scored
+            detail["constraints"] = {**scored, "think_end_token": think}
         reading, base = got["specdec"], meta["specdec"]
         if reading is not None or base is not None:
             # a checkpoint that dropped the original's MTP head scores 0.0 rather than no number
@@ -409,6 +424,14 @@ class SanitySuite(Layout):
         """
         return no_jit(ServeSettings(args=self._engine_args()))
 
+    def _think_end(self, model: str) -> str | None:
+        """The tag ``model``'s answers are cut at: the setting, else none with thinking off, else its own."""
+        if self.think_end_token is not None:
+            return self.think_end_token
+        if self.chat_template_kwargs.get("enable_thinking") is False:
+            return None
+        return think_end_of(model, [model])  # a checkpoint's own files may name its original's card
+
     def _sampling(self, reference: str) -> dict[str, Any]:
         """The sampling both models use; greedy when neither an override nor the generation config names one.
 
@@ -470,9 +493,14 @@ class SanitySuite(Layout):
         ]
         rows: list[Generation] = []
         specdec: dict[str, Any] | None = None
+        # A closing tag that is a special token (Gemma's) is stripped by vLLM's default decode, leaving no
+        # boundary for answer_region() to cut at; keep specials only when the answers are cut.
+        skip = self._think_end(model) is None
         for seed in self.seeds:
             outputs = llm.generate(
-                jobs, [sampling_params(sampling, self.max_tokens, seed) for _ in jobs], use_tqdm=False
+                jobs,
+                [sampling_params(sampling, self.max_tokens, seed, skip_special_tokens=skip) for _ in jobs],
+                use_tqdm=False,
             )
             rows += [as_generation(prompt, output) for prompt, output in zip(prompts, outputs, strict=True)]
             if mtp and specdec is None:  # the counters are cumulative: this is the first seed's reading

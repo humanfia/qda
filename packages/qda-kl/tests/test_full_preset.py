@@ -278,12 +278,51 @@ def test_an_unknown_model_gets_default_caps_and_its_generation_config_sampling(t
     got = applied(str(model))
     lm = got.entries[0]["lm_eval"]
     assert got.note == (
-        f"full: no released card for {model}; 32768-token caps and its generation_config.json's sampling"
+        f"full: no released card for {model}; 32768-token caps, its generation_config.json's sampling, and "
+        "whole answers scored (no closing thinking tag in its chat template)"
     )
     assert set(lm["max_tokens"].values()) == {16384}
     assert lm["sampling"] == {"temperature": 0.7, "top_p": 0.9}
     assert lm["serve_args"]["max_model_len"] == 16384
     assert got.entries[1]["livecodebench"]["max_tokens"] == 16384
+
+
+#: A thinking template's generation prompt: the block opens in the prompt, so an answer holds only its close.
+THINKING_TEMPLATE = (
+    "{%- if enable_thinking is false %}{{- '<think>\\n\\n</think>\\n\\n' }}"
+    "{%- else %}{{- '<think>\\n' }}{%- endif %}"
+)
+#: A thinking family's non-thinking model: the tag is in its vocabulary, never in its template.
+TAG_AS_TOKEN = {"added_tokens_decoder": {"151668": {"content": "</think>"}}, "chat_template": "{{ m }}"}
+GEMMA_TEMPLATE = {"chat_template": "<|channel>thought{{ x }}<channel|>"}
+
+
+@pytest.mark.parametrize(
+    ("name", "text", "tag"),
+    [
+        ("chat_template.jinja", THINKING_TEMPLATE, "</think>"),
+        ("tokenizer_config.json", json.dumps(GEMMA_TEMPLATE), "<channel|>"),
+        ("tokenizer_config.json", json.dumps(TAG_AS_TOKEN), None),
+    ],
+)
+def test_a_model_without_a_card_is_cut_at_its_chat_templates_thinking_tag(tmp_path, name, text, tag) -> None:
+    """A local fine-tune whose config names no original has no row; its template says where answers start."""
+    model = tmp_path / "fine-tune"
+    model.mkdir()
+    (model / "config.json").write_text(json.dumps({"max_position_embeddings": 262144}))
+    (model / "generation_config.json").write_text(json.dumps({"temperature": 0.6, "top_p": 0.95}))
+    (model / name).write_text(text)
+    got = applied(str(model))
+    assert got.entries[0]["lm_eval"]["think_end_token"] == tag
+    assert got.entries[1]["livecodebench"]["think_end_token"] == tag
+    assert got.note.endswith(
+        f"and only the text after {tag!r} scored"
+        if tag
+        else "and whole answers scored (no closing thinking tag in its chat template)"
+    )
+    override = applied(str(model), [], {"think_end_token": "</x>"})
+    assert override.entries[0]["lm_eval"]["think_end_token"] == "</x>"
+    assert override.note.endswith("and only the text after '</x>' scored (your overrides applied)")
 
 
 def test_an_unreadable_generation_config_is_refused_in_two_lines(tmp_path) -> None:

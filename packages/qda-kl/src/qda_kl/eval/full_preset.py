@@ -29,6 +29,8 @@ __all__ = [
     "applied",
     "card_sampling",
     "row_of",
+    "template_think_end",
+    "think_end_of",
 ]
 
 
@@ -188,6 +190,11 @@ FAMILIES: dict[str, Family] = {
     ),
 }
 
+#: The table's closing thinking tags: a model the table does not name is matched to one by its chat template.
+THINK_END_TOKENS: tuple[str, ...] = tuple(
+    dict.fromkeys(row.think_end_token for row in FAMILIES.values() if row.think_end_token is not None)
+)
+
 
 class FullSettings(BaseModel):
     """What a user may override in a ``full`` entry; every unset field keeps the table's value.
@@ -285,6 +292,36 @@ def card_sampling(reference: str) -> tuple[dict[str, float], str] | None:
     return None if row is None or origin is None else (dict(row.sampling), _key(origin))
 
 
+def template_think_end(model: str) -> str | None:
+    """The table's closing thinking tag that ``model``'s chat template writes, or None (also for a Hub id).
+
+    Only a local directory's template is read (``chat_template.jinja``, ``chat_template.json`` or
+    ``tokenizer_config.json``'s), never the vocabulary: a thinking family's other models carry the tag too.
+    """
+    templates: list[str] = []
+    for name in ("chat_template.jinja", "chat_template.json", "tokenizer_config.json"):
+        path = Path(model) / name
+        if not path.is_file():
+            continue
+        try:
+            text = path.read_text()
+            if name.endswith(".json"):  # tokenizer_config.json also lists the added tokens: the template only
+                text = json.dumps(json.loads(text).get("chat_template"))
+        except (OSError, ValueError):
+            continue
+        templates.append(text)
+    return next((tag for tag in THINK_END_TOKENS if any(tag in text for text in templates)), None)
+
+
+def think_end_of(reference: str, checkpoints: Sequence[str] = ()) -> str | None:
+    """The closing thinking tag a model's answers are cut at: its released card's, else its chat template's.
+
+    ``full`` (whose default row reads the template) and the ``sanity`` suite resolve the tag alike.
+    """
+    row, _ = row_of(reference, checkpoints)
+    return row.think_end_token if row is not None else template_think_end(reference)
+
+
 def _refuse_two_lines(reason: str) -> Refused:
     """A refusal in the shape the preset promises: the reason, then the one change that fixes it."""
     return Refused(
@@ -295,7 +332,7 @@ def _refuse_two_lines(reason: str) -> Refused:
 
 
 def _defaults(reference: str, origin: str | None) -> Family:
-    """The row a model the table does not name gets: 32768-token caps and its generation_config's sampling."""
+    """The row a model the table does not name gets: 32768-token caps, its own sampling and thinking tag."""
     from qda_kl.reference import context_length
 
     name = origin or str(reference)
@@ -317,7 +354,7 @@ def _defaults(reference: str, origin: str | None) -> Family:
     return Family(
         max_tokens=caps,
         sampling=sampling,
-        think_end_token=None,
+        think_end_token=template_think_end(name),
         max_model_len=min(context, DEFAULT_MAX_MODEL_LEN),
     )
 
@@ -421,14 +458,21 @@ def applied(
             "full: " + "; ".join(f"{'.'.join(map(str, err['loc']))}: {err['msg']}" for err in e.errors())
         ) from None
     row, origin = row_of(reference, checkpoints)
-    note = (
-        f"full: settings of {_key(origin)} (the released cards')"
-        if row is not None
-        else f"full: no released card for {origin or reference}; 32768-token caps and its "
-        "generation_config.json's sampling"
-    )
-    if row is None:
+    if row is not None:
+        note = f"full: settings of {_key(origin)} (the released cards')"
+    else:
         row = _defaults(reference, origin)
+        # a thinking model's whole answer holds its thinking too, so the note says which text is scored
+        think = row.think_end_token if spec.think_end_token is None else spec.think_end_token
+        scored = (
+            f"only the text after {think!r} scored"
+            if think
+            else "whole answers scored (no closing thinking tag in its chat template)"
+        )
+        note = (
+            f"full: no released card for {origin or reference}; 32768-token caps, its "
+            f"generation_config.json's sampling, and {scored}"
+        )
     if settings:
         note += " (your overrides applied)"
     return Applied(note=note, origin=origin, entries=_entries(reference, row, spec))
